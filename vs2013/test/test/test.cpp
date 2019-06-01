@@ -471,7 +471,35 @@ int CALLBACK WinMain(
 
 	// No - the ++a refers to the a inside the block
 
+	//---Day 5 intro to C on windows Q and A
 
+	// Bit fields - define struct members with number of bits (usually less than a byte too)
+	// Casey would hand code anything rather than let compiler generate stuff
+
+	// Remember I-Cache - code not data - gets pulled into I-Cache from memory.
+
+	// Virtual Lock function (check MSDN) - Locks the specified region of the process's virtual address
+	// space into physical memory, ensuring subsequent access to the region will not incur a page fault
+	// That is do not swap the page in physical memory to disk ever (unless there are conditions Casey is not
+	// not sure about it).
+
+	// Bit shifting operations (different ones) are not always flat-cost (hardware gate implementation) but we will assume they
+	// are. Really what matters are memory accesses and floating point operations
+
+	// Short circuiting example
+	int aa = 1;
+	int bb = 1;
+
+	int zz = (aa = aa + 1) || (bb = bb + 1);
+	//first expression should return non-zero (true)
+	// aa will be incremented; bb will not
+
+	// look at this though:
+	int qq = (aa = 0) || (bb = bb + 1);
+
+	// aa = 0 does not evaluate to non-zero (i.e its not that the assignment happens, is true: rather it is using the value
+	// of aa which is first set to 0
+	// b increments in this case
 
 
 
