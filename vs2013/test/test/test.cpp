@@ -107,6 +107,315 @@ int CALLBACK WinMain(
 	// .. or my PS3!!
 	//--
 
+	int x = 5;
+	int y = 10;
+	int z = 12;
+
+	x = 0xA;
+	/*
+		0xA == 1010
+
+		in memory(or really more generally on the machine: virtual mem, hard disk, via os etc)
+		we have for an int 4 bytes = 4*8bits groups.
+
+		00000000 00000000 00000000 00001010
+
+		Lets break it up into nibbles to help with hex (4bits => 1 hex digit)
+
+		0000 0000     0000 0000    0000 0000    0000 1010
+
+		x << 1 =>
+
+		0000 0000     0000 0000    0000 0000    0001 0100
+	0x     00             00           00          14
+	dec                       20
+
+
+		x << 1 =>
+
+		0000 0000     0000 0000    0000 0000    0010 1000
+	0x     00             00           00          28
+	dec                       40
+
+
+		x << 1 =>
+
+		0000 0000     0000 0000    0000 0000    0101 0000
+	0x     00             00           00         50 
+	dec                      80 
+		
+
+		x << 1 =>
+
+		0000 0000     0000 0000    0000 0000    1010 0000
+	0x     00             00           00         a0 
+	dec                      160 
+
+	*/	
+	x = x << 1;
+	x = x << 1;
+	x = x << 1;
+	x = x << 1;
+	x = x << 1;
+	x = x << 1;
+	x = x << 1;
+	x = x << 1;
+	x = x << 1;
+	x = x << 1;
+
+	x = 0;
+	y = 1 << 4;
+
+	// x does not have any bits set; y does, 1 bit set for down from the first bit (5th position):
+	// so
+
+	x = x | y;
+	
+	// will result in x == 0x10
+
+	// so x now has its fifth bit set:
+
+	// therefore:
+
+	x = x | (1 << 8);   // note we could have assigned z = 1 << 8, but can do it directly: 1 << 8 == 000...0001 0000 0000.
+
+	// will result in x having its fifth bit set AND its 9th bit. It already had its fifth bit set. Note the lack of 
+	// short-circuiting : it doens't just stay the same - it sets the bit as described in the second operand
+
+	// so we expect x to now be 0x110
+
+	x = x | (1 << 8);
+
+	// Now consider what happens with the bitwise &: x has bits set. 1 << 4 has bits set
+	// x == 0x110
+	// 1<<4 == 0x010
+	
+	x = x & (1 << 4);
+
+	// I expect x then to be 0x010 : the only bit pattern both x and 1 << 4 have in common
+
+	// So | is you take on both (operand) set bits; & is you only get the mutual set bits of the operands
+
+	// & can be used for masking:
+	// consider x == 0x11011101
+	// and y ==      0x11111111
+	// & will result in x:
+	x = 0x11011101;
+	y = 0x11111111;
+
+	x = x & y;
+
+	// | will result in y:
+
+	x = x | y;
+
+	// you could also zero a number:
+
+	// reassigning x the same value as before, for clarity on opposite bits
+	x = 0x11011101;
+	y = 0x00100010;
+
+	x = x & y; //x will == 0;
+
+	// Not
+
+	x = 0;
+	x = ~x;
+
+	//-- Exclusive OR
+
+	x = (1 << 4) | (1 << 8); // x =  0x00000110
+	y = (1 << 8) | (1 << 16); // y = 0x00010100
+
+	z = x | y; // z = 0x00010110;
+
+	int q = x & y; // q 0x00000100
+
+	int r = x ^ y; // r = 0x00010010
+
+	// cool property - inversion:
+
+	/*
+	Consider 01010,b
+
+	then ^'ed with itself, is 00000 = zero
+
+	consider x,b = 01010
+			 y,b = 01001
+
+	x^y = 00011
+
+	and this result ^'ed with y:
+	01010; i.e x again!
+
+	i.e (a^b)^b = a.
+
+	Drawing it out on a venn diagram (even in your head) will show this to be true.
+
+	In words: a^b results in all of a and all of b, but for the common part of a and b.
+
+	Then, taking this result and again applying ^b results in in all of a^b and all of b,
+	but for any part in common: and the only part in common is the part of b without a.
+
+	The above assumes an intersection between a and b, however it work if there is none:
+	for then a^b is simply all of a and all of b, and then ^ with b again, only a remains.
+
+	The special case, where a=b is clear using venn diagrams too - nothing is left (empty) as everything is in common (a with
+	itself)
+	*/
+
+	//--
+
+	//-- Logical operators
+
+	x = 0; //False
+	y = 1;// True
+	z = 19423042;//True
+	r = -349; // N.B have not yet done 2-complement yet, note!
+
+	// Things are either zero or they are not (everything non-zero is true)
+
+	// C does not have type bool!
+	int less = (x < y); 
+	int greater = (x > y);
+	int equal = (x == y);
+	int notequal = (x != y);
+
+	less = (z < r); 
+	greater = (z > r);
+	equal = (z == r);
+	notequal = (z != r);
+
+	//! Compiler is under no obligation (in general) to produce a 1 for true - but check the spec
+	// Again, C does not have type bool!
+
+	// Loops
+
+	// Would not really do this, but drives home the point of break
+	while (1)
+	{
+		x = x << 4;
+
+		if (x == 0)
+		{
+			break;
+		}
+	}
+
+	for (x = 0xa;  // Once at beginning
+		(x != 0);  // Condition
+		x = x << 4) //The thing to do every iteration
+	{
+		// More stuff
+		//OutputDebugStringA("We are in the loop!\n");
+	}
+
+	// this can be transformed into:
+
+	x = 0xa; // Do once
+	while (x != 0) // Condition check
+	{
+		OutputDebugStringA("We are in the loop!\n");
+		x = x << 4; // do this every iteration
+	}
+
+	// Switch - when tired of if! Good when comaparing to constants
+
+	x = 3;
+
+	// instead of
+	if (x == 0)
+	{
+		OutputDebugStringA("Case 0\n");
+	}
+	else if (x == 1)
+	{
+		OutputDebugStringA("Case 1\n");
+	}
+	else if (x == 2)
+	{
+		OutputDebugStringA("Case 2\n");
+	}
+	else if (x == 3)
+	{
+		OutputDebugStringA("Case 3\n");
+	}
+	else if (x == 4)
+	{
+		OutputDebugStringA("Case 4\n");
+	}
+	else if (x == 5)
+	{
+		OutputDebugStringA("Case 5\n");
+	}
+	else if (x == 6)
+	{
+		OutputDebugStringA("Case 6\n");
+	}
+	else
+	{
+		OutputDebugStringA("Case is unknown! \n");
+	}
+
+	// etc...
+
+	// Can do
+
+	switch (x)
+	{
+	case 0:
+		OutputDebugStringA("Case 0\n");
+	case 1:
+		OutputDebugStringA("Case 1\n");
+	case 2:
+		OutputDebugStringA("Case 2\n");
+	case 3:
+		OutputDebugStringA("Case 3\n");
+	case 4:
+		OutputDebugStringA("Case 4\n");
+	case 5:
+		OutputDebugStringA("Case 5\n");
+	case 6:
+		OutputDebugStringA("Case 6\n");
+	default:   // same as the else above, if nothing else is true
+		OutputDebugStringA("Case is unknown! \n");
+
+	}
+
+	// NOTE the difference (look at output window) - switch only does the jumping for you - it will immediately jump
+	// to the case that matches x - but then CONTINUE printing out the other cases!
+
+	// this is where *break* comes in...
+	switch (x)
+	{
+	case 0:
+		OutputDebugStringA("Case 0\n");
+		break;
+	case 1:
+		OutputDebugStringA("Case 1\n");
+		break;
+	case 2:
+		OutputDebugStringA("Case 2\n");
+		break;
+	case 3:
+		OutputDebugStringA("Case 3\n");
+		break;
+	case 4:
+		OutputDebugStringA("Case 4\n");
+		break;
+	case 5:
+		OutputDebugStringA("Case 5\n");
+		break;
+	case 6:
+		OutputDebugStringA("Case 6\n");
+		break;
+	default:   // same as the else above, if nothing else is true
+		OutputDebugStringA("Case is unknown! \n");
+		break; //Probably don't need this!
+
+	}
+
+	// up to 1:31:36
 
 
 
