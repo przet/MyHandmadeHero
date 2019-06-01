@@ -415,7 +415,62 @@ int CALLBACK WinMain(
 
 	}
 
-	// up to 1:31:36
+	//-- Blocks
+
+	// Cool stuff coming up with pointers!
+
+	int a = 5;
+	int *ptr = 0;
+
+	if (a == 5)
+	{
+		int b = 6;
+		int a = 4;
+
+		ptr = &b;
+	}
+
+	// Now b is out of scope
+	// b = 4 //will not compile, for example
+
+	// BUT. can do: (read: should not though!) - almost never any reason to do this - except maybe when hacking something??
+
+	*ptr = 5;
+
+	// Note however compilers are usaully under no obligation to keep that memory available - it _could_ use it
+	// for something else, but in this case of nothing else happening in the program, it just keeps it there because
+	// there is no reason yet to clear it, and it has no use for it yet - although there are some scenarios I could
+	// think of where it could clear it, perhaps in multithreading scenarios?
+
+	//-- Ptr to ptr
+
+	int **ptrptr = 0;
+	if (a == 5)
+	{
+		int b = 6;
+		int a = 4;
+
+		ptr = &b;
+		ptrptr = &ptr;
+	}
+
+	int *tempPtr = *ptrptr; // expect the address of b
+	a = **ptrptr;  //expect 6 (b was set to 6)
+
+
+	// Check this out: shadowing and while loop
+	// Will this loop end?
+
+	while (a <= 5)
+	{
+		int *ptr_to_outside_a = &a;
+		int a = 6;
+		int *ptr_to_inside_a = &a;
+		++a;
+	}
+
+	// No - the ++a refers to the a inside the block
+
 
 
 
