@@ -16,6 +16,21 @@
     #undef DispatchMessage
     #undef DefWindowProc 
 
+    // static in C/C++ means different things depending on where it is placed...so Casey does this neat trick:
+    #define internal_function static 
+    #define local_persist static
+    #define global_variable static// doesn't this still have the same effect as internal_function? as in only acessed from here? We get auto init to zero though
+
+    //TODO: This is a global for now
+    global_variable bool Running;
+
+    //DIB = device independent bitmap: cf GDI
+    void
+    ResizeDIBSection()
+    {
+    }
+
+
 
 
     LRESULT CALLBACK
@@ -34,26 +49,23 @@
 
             case WM_SIZE:
             {
+                //Client rect is the area you can interact with , not the borders etc that Windows handles
+                RECT ClientRect;
+                GetClientRect(Window, &ClientRect);
+                ResizeDIBSection();
                 OutputDebugStringA("WM_SIZE\n");
             } break;
 
             case WM_DESTROY:
             {
-                OutputDebugStringA("WM_DESTROY\n");
+                //TODO: Handle this as an error - recreate window?
+                Running = false;
             } break;
 
             case WM_CLOSE:
             {
-                OutputDebugStringA("WM_CLOSE\n");
-	        if (!DestroyWindow(WindowHandle))
-		{
-	    	    OutputDebugStringA("Something bad happened - window not destroyed\n");
-		}
-                else
-                {
-	    	    OutputDebugStringA("Window destroyed!\n");
-                }
-
+                //TODO: Handle this with a message to the user?
+                Running = false;
             } break;
 
             case WM_CREATE:
@@ -88,7 +100,7 @@
                 LONG Height = Paint.rcPaint.top - Paint.rcPaint.bottom;
                 // Don't do willy-nilly - Casey only uses static for debugging, where it can be useful
                 // Also understand what he is saying with lexical scope and static vs global
-                static DWORD Operation = BLACKNESS;
+                local_persist DWORD Operation = BLACKNESS;
                 PatBlt(DeviceContext, X, Y, Width, Height, Operation);
                 switch(Operation)
                 {
@@ -171,7 +183,8 @@
             if(WindowHandle)
             {
                 MSG Message;
-                for(;;)
+                Running = true;
+                while(Running)
                 {
                     BOOL MessageResult = GetMessageA(&Message,0, 0, 0);
                     if(MessageResult > 0)
