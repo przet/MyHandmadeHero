@@ -23,11 +23,68 @@
 
     //TODO: This is a global for now
     global_variable bool Running;
+    global_variable BITMAPINFO BitmapInfo; //we want global persistence
+    global_variable void * BitmapMemory; 
+    global_variable HBITMAP BitmapHandle;
+    global_variable HDC BitmapDeviceContext;
 
-    //DIB = device independent bitmap: cf GDI
+    // DIB = device independent bitmap: cf GDI
+    // Note Casey prefixes any of his own functions (non windows API) with "Win32" to specify platform specific functions
+    // and to avoid collision with any Windows functions. I am not sure if I think this is the clearest though, as it makes it look
+    // like Windows API...but the functions will usually only work for Windows anyway, so maybe its fine...
     void
-    ResizeDIBSection()
+    Win32ResizeDIBSection(int Width , int Height)
     {
+        if(BitmapHandle)
+        {
+            DeleteObject(BitmapHandle);
+        }
+        if(!BitmapDeviceContext) 
+        {
+            BitmapDeviceContext = CreateCompatibleDC(0);
+        }
+
+        BITMAPINFO BitmapInfo;
+        // Specify our BitmapInfo structure attributes
+        BitmapInfo.bmiHeader.biSize = sizeof(BitmapInfo.bmiHeader);
+        BitmapInfo.bmiHeader.biWidth = Width;
+        BitmapInfo.bmiHeader.biHeight = Height;
+        BitmapInfo.bmiHeader.biPlanes = 1;
+        BitmapInfo.bmiHeader.biBitCount = 32;
+        BitmapInfo.bmiHeader.biCompression = BI_RGB;
+        // Casey :Since BitmapInfo is static, its initialised to zero,
+        // so we don't need to set the rest of the fields to 0...
+        // *BUT* I do not think this is correct = the bmiHeader field is not necessarily all field zero (usually we will, but this
+        // is not guaranteed)
+        BitmapInfo.bmiHeader.biSizeImage = 0;
+        BitmapInfo.bmiHeader.biXPelsPerMeter = 0;
+        BitmapInfo.bmiHeader.biYPelsPerMeter = 0;
+        BitmapInfo.bmiHeader.biClrUsed = 0;
+        BitmapInfo.bmiHeader.biClrImportant = 0;
+
+
+        BitmapHandle = CreateDIBSection(BitmapDeviceContext,
+                                       &BitmapInfo,
+                                       DIB_RGB_COLORS,
+                                       &BitmapMemory,
+                                       NULL,0);
+
+            
+        
+    }
+
+    void
+    Win32UpdateWindow(HDC DeviceContext, int X , int Y, int Width, int Height)
+    {
+        StretchDIBits(DeviceContext,
+                      X, Y, Width, Height,
+                      X, Y, Width, Height,
+                      BitmapMemory,
+                      &BitmapInfo,
+                      DIB_RGB_COLORS,
+                      SRCCOPY); 
+
+
     }
 
 
@@ -39,21 +96,17 @@
                        WPARAM WParam, 
                        LPARAM LParam) 
     {
-        LRESULT Result = 0; // Zero for now
+        LRESULT Result = 0; 
 
-        // Note Casey's use of {} in case - so that he can keep an variable declared local to a case block,
-        // rather than the whole switch block; break outside no other
-        // reason than simpler to read, and maybe not removed by mistake, getting mixed up with other code
         switch(Message)
         {
-
             case WM_SIZE:
             {
-                //Client rect is the area you can interact with , not the borders etc that Windows handles
                 RECT ClientRect;
-                GetClientRect(Window, &ClientRect);
-                ResizeDIBSection();
-                OutputDebugStringA("WM_SIZE\n");
+                GetClientRect(WindowHandle, &ClientRect);
+                int Width = ClientRect.right - ClientRect.left;
+                int Height = ClientRect.top - ClientRect.bottom;
+                Win32ResizeDIBSection(Width, Height);
             } break;
 
             case WM_DESTROY:
@@ -90,7 +143,6 @@
 
             case WM_PAINT:
             {
-                OutputDebugStringA("WM_PAINT\n");
                 PAINTSTRUCT Paint;
                 HDC DeviceContext = BeginPaint(WindowHandle, &Paint);
                 LONG X = Paint.rcPaint.left;
@@ -98,6 +150,7 @@
                 // I had width zero, what does this do?
                 LONG Width = Paint.rcPaint.right - Paint.rcPaint.left;
                 LONG Height = Paint.rcPaint.top - Paint.rcPaint.bottom;
+                Win32UpdateWindow(DeviceContext, X, Y, Width, Height);
                 // Don't do willy-nilly - Casey only uses static for debugging, where it can be useful
                 // Also understand what he is saying with lexical scope and static vs global
                 local_persist DWORD Operation = BLACKNESS;
