@@ -264,7 +264,7 @@
         
         WNDCLASS WindowClass = {}; 
 
-        WindowClass.style = CS_OWNDC;
+        WindowClass.style = CS_HREDRAW | CS_VREDRAW;
 
         WindowClass.lpfnWndProc = MainWindowCallback;
         WindowClass.hInstance = Instance; 
