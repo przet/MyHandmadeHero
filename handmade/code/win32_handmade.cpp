@@ -55,17 +55,13 @@
             uint8 *Pixel = (uint8 *)Row;
             for (int X = 0; X < BitmapWidth; ++X)
             {
-                *Pixel = X + XOffset;
-                ++Pixel;
+                *Pixel++ = X + XOffset;
 
-                *Pixel = Y + YOffset;
-                ++Pixel;
+                *Pixel++ = Y + YOffset;
 
-                *Pixel = 0 ;
-                ++Pixel;
+                *Pixel++ = 0;
 
-                *Pixel = 0 ;
-                ++Pixel;
+                *Pixel++ = 0; 
             }
 
             Row += Pitch;
@@ -99,7 +95,7 @@
         
         // 32 for 4byte alignment (24  =3 bytes; 1 more byte for this "padding" to give 
         // alignment on 4 byte boundary (x86 architecture efficiency)
-        BitmapInfo.bmiHeader.biBitCount = 32;
+		BitmapInfo.bmiHeader.biBitCount = 32;
         BitmapInfo.bmiHeader.biCompression = BI_RGB;
         BitmapInfo.bmiHeader.biSizeImage = 0;
         BitmapInfo.bmiHeader.biXPelsPerMeter = 0;
@@ -241,7 +237,6 @@
 
 
     int CALLBACK 
-                
     WinMain(HINSTANCE Instance,
            HINSTANCE PrevInstance,
            LPSTR CmdLine,
