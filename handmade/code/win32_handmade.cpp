@@ -18,7 +18,7 @@
     #undef DefWindowProc 
     #undef PeekMessage 
 
-    #define internal_function static 
+    #define internal static 
     #define local_persist static
     #define global_variable static
 
@@ -41,7 +41,7 @@
     global_variable int BitmapHeight; 
     global_variable int BytesPerPixel = 4;
 
-    void
+    internal void
     RenderWeirdGradient(int XOffset, int YOffset)
     {
         int Width = BitmapWidth;
@@ -91,7 +91,7 @@
     }
 
 
-    void
+    internal void
     Win32ResizeDIBSection(int Width , int Height)
     {
 
