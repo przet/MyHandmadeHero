@@ -48,7 +48,7 @@
 
         // casting void to char type (want per byte arithmetic)
         uint8 *Row = (uint8 *)BitmapMemory;
-        int Pitch = Width*BytesPerPixel;
+        //int Pitch = Width*BytesPerPixel;
 
         for (int Y = 0; Y < BitmapHeight; ++Y)
         {
@@ -82,7 +82,7 @@
                 // TODO : operator precedence : remove brackets
             }
 
-            Row += Pitch;
+            Row = (uint8 *)Pixel;
             // TODO Casey makes a comment here that the separation of operations (Row adding and Pixel)
             // may seem inefficient, we do ++Pixel because sometimes byte boundaries may differ(??).
             // Its < 33:30
