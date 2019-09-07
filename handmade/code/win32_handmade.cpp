@@ -320,6 +320,7 @@
                     ReleaseDC(WindowHandle, DeviceContext);
 
                     ++XOffset;
+                    YOffset += 2;
 
                 }
             }
