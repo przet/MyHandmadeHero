@@ -205,6 +205,11 @@
                 OutputDebugStringA("WM_ACTIVATEAPP\n");
             } break;
 
+            case WM_SETCURSOR:
+            {
+                SetCursor(0);
+            } break;
+
             case WM_PAINT:
             {
                 PAINTSTRUCT Paint;
