@@ -52,7 +52,7 @@
 
         for (int Y = 0; Y < BitmapHeight; ++Y)
         {
-            uint8 *Pixel = (uint8 *)Row;
+            uint8 *Pixel = Row;
             for (int X = 0; X < BitmapWidth; ++X)
             {
                 *Pixel++ = X + XOffset;
