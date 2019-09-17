@@ -132,10 +132,10 @@
     }
 
     void
-    Win32UpdateWindow(HDC DeviceContext, RECT *WindowRect, int X , int Y, int Width, int Height)
+    Win32UpdateWindow(HDC DeviceContext, RECT WindowRect, int X , int Y, int Width, int Height)
     {
-        int WindowWidth = WindowRect->right - WindowRect->left;
-        int WindowHeight = WindowRect->bottom - WindowRect->top;
+        int WindowWidth = WindowRect.right - WindowRect.left;
+        int WindowHeight = WindowRect.bottom - WindowRect.top;
         StretchDIBits(DeviceContext,
                       
                       /* Draw to whole window FIRST, leave this (subsection of window
@@ -216,7 +216,7 @@
 
                 RECT ClientRect;
                 GetClientRect(WindowHandle, &ClientRect);
-                Win32UpdateWindow(DeviceContext, &ClientRect, X, Y, Width, Height);
+                Win32UpdateWindow(DeviceContext, ClientRect, X, Y, Width, Height);
 
                 local_persist DWORD Operation = BLACKNESS;
                 PatBlt(DeviceContext, X, Y, Width, Height, Operation);
@@ -311,7 +311,7 @@
                     GetClientRect(WindowHandle, &ClientRect);
                     int WindowWidth = ClientRect.right - ClientRect.left;
                     int WindowHeight = ClientRect.bottom - ClientRect.top;
-                    Win32UpdateWindow(DeviceContext, &ClientRect, 0, 0, WindowWidth, WindowHeight);
+                    Win32UpdateWindow(DeviceContext, ClientRect, 0, 0, WindowWidth, WindowHeight);
                     ReleaseDC(WindowHandle, DeviceContext);
 
                     ++XOffset;

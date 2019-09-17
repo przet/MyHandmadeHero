@@ -1,0 +1,2 @@
+- Around ~9min and before, Casey talks about pointer aliasing (this is when we are changing from RECT* to RECT in win32UpdateWindow(....)
+- Also, I _think_ Casey says something about RECT being reasonably small...but is it? 4 x LONG which is 4 x 4  = 16 bytes I believe
