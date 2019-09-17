@@ -35,25 +35,30 @@
 
     //TODO: This is a global for now
     global_variable bool Running;
-    global_variable BITMAPINFO BitmapInfo; //we want global persistence
-    global_variable void * BitmapMemory; 
-    global_variable int BitmapWidth; 
-    global_variable int BitmapHeight; 
-    global_variable int BytesPerPixel = 4;
+
+    struct win32_offscreen_buffer
+    {
+        BITMAPINFO Info; 
+        void * Memory; 
+        int Width; 
+        int Height; 
+        int BytesPerPixel = 4;
+    } Buffer;
+
 
     internal void
-    RenderWeirdGradient(int XOffset, int YOffset)
+    RenderWeirdGradient(win32_offscreen_buffer *Buffer, int XOffset, int YOffset)
     {
-        int Width = BitmapWidth;
+        int Width = Buffer->Width;
 
         // casting void to char type (want per byte arithmetic)
-        uint8 *Row = (uint8 *)BitmapMemory;
-        int Pitch = Width*BytesPerPixel;
+        uint8 *Row = (uint8 *)Buffer->Memory;
+        int Pitch = Width*Buffer->BytesPerPixel;
 
-        for (int Y = 0; Y < BitmapHeight; ++Y)
+        for (int Y = 0; Y < Buffer->Height; ++Y)
         {
             uint32 *Pixel = (uint32 *)Row;
-            for (int X = 0; X < BitmapWidth; ++X)
+            for (int X = 0; X < Buffer->Width; ++X)
             {
                 // Explanation:
                 // 
@@ -92,39 +97,39 @@
 
 
     internal void
-    Win32ResizeDIBSection(int Width , int Height)
+    Win32ResizeDIBSection(win32_offscreen_buffer *Buffer, int Width , int Height)
     {
 
-        if (BitmapMemory)
+        if (Buffer->Memory)
         {
-            VirtualFree(BitmapMemory, 0, MEM_RELEASE);
+            VirtualFree(Buffer->Memory, 0, MEM_RELEASE);
         }
 
-        BitmapWidth = Width;
-        BitmapHeight = Height;
+        Buffer->Width = Width;
+        Buffer->Height = Height;
 
         // Specify our BitmapInfo structure attributes
-        BitmapInfo.bmiHeader.biSize = sizeof(BitmapInfo.bmiHeader);
-        BitmapInfo.bmiHeader.biWidth = BitmapWidth;
+        Buffer->Info.bmiHeader.biSize = sizeof(Buffer->Info.bmiHeader);
+        Buffer->Info.bmiHeader.biWidth = Buffer->Width;
         
         // Top down so negative (see MSDN)
-        BitmapInfo.bmiHeader.biHeight = -BitmapHeight;
-        BitmapInfo.bmiHeader.biPlanes = 1;
+        Buffer->Info.bmiHeader.biHeight = -Buffer->Height;
+        Buffer->Info.bmiHeader.biPlanes = 1;
         
         // 32 for 4byte alignment (24  =3 bytes; 1 more byte for this "padding" to give 
         // alignment on 4 byte boundary (x86 architecture efficiency)
-		BitmapInfo.bmiHeader.biBitCount = 32;
-        BitmapInfo.bmiHeader.biCompression = BI_RGB;
-        BitmapInfo.bmiHeader.biSizeImage = 0;
-        BitmapInfo.bmiHeader.biXPelsPerMeter = 0;
-        BitmapInfo.bmiHeader.biYPelsPerMeter = 0;
-        BitmapInfo.bmiHeader.biClrUsed = 0;
-        BitmapInfo.bmiHeader.biClrImportant = 0;
+        Buffer->Info.bmiHeader.biBitCount = 32;
+        Buffer->Info.bmiHeader.biCompression = BI_RGB;
+        Buffer->Info.bmiHeader.biSizeImage = 0;
+        Buffer->Info.bmiHeader.biXPelsPerMeter = 0;
+        Buffer->Info.bmiHeader.biYPelsPerMeter = 0;
+        Buffer->Info.bmiHeader.biClrUsed = 0;
+        Buffer->Info.bmiHeader.biClrImportant = 0;
 
-        int BitmapMemorySize = (Width*Height)*BytesPerPixel;
+        int BitmapMemorySize = (Width*Height)*Buffer->BytesPerPixel;
 
         // VirtualAlloc returns pages - a bit more "raw" than HeapAlloc
-        BitmapMemory = VirtualAlloc(0, BitmapMemorySize, MEM_COMMIT, PAGE_READWRITE);
+        Buffer->Memory = VirtualAlloc(0, BitmapMemorySize, MEM_COMMIT, PAGE_READWRITE);
 
         //TODO : we might want to initialise this to black 
 
@@ -132,7 +137,7 @@
     }
 
     void
-    Win32UpdateWindow(HDC DeviceContext, RECT WindowRect, int X , int Y, int Width, int Height)
+    Win32UpdateWindow(win32_offscreen_buffer *Buffer, HDC DeviceContext, RECT WindowRect, int X , int Y, int Width, int Height)
     {
         int WindowWidth = WindowRect.right - WindowRect.left;
         int WindowHeight = WindowRect.bottom - WindowRect.top;
@@ -144,10 +149,10 @@
                       X, Y, Width, Height,
                       */
                       // 0,0 to start at top left corner I believe
-                      0, 0, BitmapWidth, BitmapHeight,
+                      0, 0, Buffer->Width, Buffer->Height,
                       0, 0, WindowWidth, WindowHeight,
-                      BitmapMemory,
-                      &BitmapInfo,
+                      Buffer->Memory,
+                      &Buffer->Info,
                       DIB_RGB_COLORS,
                       SRCCOPY); 
     }
@@ -158,7 +163,7 @@
                        WPARAM WParam, 
                        LPARAM LParam) 
     {
-        LRESULT Result = 0; 
+        LRESULT Result = 0;
 
         switch(Message)
         {
@@ -170,7 +175,7 @@
                 
                 // We look from the top of the screen! (think how an image is rendered usually - from l to r, t ot b)
                 int Height = ClientRect.bottom - ClientRect.top;
-                Win32ResizeDIBSection(Width, Height);
+                Win32ResizeDIBSection(&Buffer, Width, Height);
             } break;
 
             case WM_DESTROY:
@@ -216,7 +221,7 @@
 
                 RECT ClientRect;
                 GetClientRect(WindowHandle, &ClientRect);
-                Win32UpdateWindow(DeviceContext, ClientRect, X, Y, Width, Height);
+                Win32UpdateWindow(&Buffer, DeviceContext, ClientRect, X, Y, Width, Height);
 
                 local_persist DWORD Operation = BLACKNESS;
                 PatBlt(DeviceContext, X, Y, Width, Height, Operation);
@@ -304,14 +309,14 @@
                         DispatchMessageA(&Message);
                     }
 
-                    RenderWeirdGradient(XOffset, YOffset);
+                    RenderWeirdGradient(&Buffer, XOffset, YOffset);
 
                     HDC DeviceContext = GetDC(WindowHandle);
                     RECT ClientRect;
                     GetClientRect(WindowHandle, &ClientRect);
                     int WindowWidth = ClientRect.right - ClientRect.left;
                     int WindowHeight = ClientRect.bottom - ClientRect.top;
-                    Win32UpdateWindow(DeviceContext, ClientRect, 0, 0, WindowWidth, WindowHeight);
+                    Win32UpdateWindow(&Buffer, DeviceContext, ClientRect, 0, 0, WindowWidth, WindowHeight);
                     ReleaseDC(WindowHandle, DeviceContext);
 
                     ++XOffset;
