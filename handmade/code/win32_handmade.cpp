@@ -129,7 +129,7 @@
         Buffer->Info.bmiHeader.biClrUsed = 0;
         Buffer->Info.bmiHeader.biClrImportant = 0;
 
-        int BitmapMemorySize = (Width*Height)*Buffer->BytesPerPixel;
+        int BitmapMemorySize = (Buffer->Width*Buffer->Height)*Buffer->BytesPerPixel;
 
         // VirtualAlloc returns pages - a bit more "raw" than HeapAlloc
         Buffer->Memory = VirtualAlloc(0, BitmapMemorySize, MEM_COMMIT, PAGE_READWRITE);
