@@ -40,6 +40,7 @@
         void * Memory; 
         int Width; 
         int Height; 
+        int Pitch; 
         int BytesPerPixel;
     };
 
@@ -49,18 +50,18 @@
 
 
     internal void
-    RenderWeirdGradient(win32_offscreen_buffer *Buffer, int XOffset, int YOffset)
+    RenderWeirdGradient(win32_offscreen_buffer Buffer, int XOffset, int YOffset)
     {
-        int Width = Buffer->Width;
 
+        // TODO : See what optimizer does (with pass by value of buffer??)
+        
         // casting void to char type (want per byte arithmetic)
-        uint8 *Row = (uint8 *)Buffer->Memory;
-        int Pitch = Width*Buffer->BytesPerPixel;
+        uint8 *Row = (uint8 *)Buffer.Memory;
 
-        for (int Y = 0; Y < Buffer->Height; ++Y)
+        for (int Y = 0; Y < Buffer.Height; ++Y)
         {
             uint32 *Pixel = (uint32 *)Row;
-            for (int X = 0; X < Buffer->Width; ++X)
+            for (int X = 0; X < Buffer.Width; ++X)
             {
                 // Explanation:
                 // 
@@ -89,7 +90,7 @@
                 // TODO : operator precedence : remove brackets
             }
 
-            Row += Pitch;
+            Row += Buffer.Pitch;
             // TODO Casey makes a comment here that the separation of operations (Row adding and Pixel)
             // may seem inefficient, we do ++Pixel because sometimes byte boundaries may differ(??).
             // Its < 33:30
@@ -133,6 +134,8 @@
 
         // VirtualAlloc returns pages - a bit more "raw" than HeapAlloc
         Buffer->Memory = VirtualAlloc(0, BitmapMemorySize, MEM_COMMIT, PAGE_READWRITE);
+
+        Buffer->Pitch = Buffer->Width*Buffer->BytesPerPixel;
 
         //TODO : we might want to initialise this to black 
 
@@ -315,7 +318,7 @@
                         DispatchMessageA(&Message);
                     }
 
-                    RenderWeirdGradient(&GlobalBackBuffer, XOffset, YOffset);
+                    RenderWeirdGradient(GlobalBackBuffer, XOffset, YOffset);
 
                     HDC DeviceContext = GetDC(WindowHandle);
                     RECT ClientRect;
