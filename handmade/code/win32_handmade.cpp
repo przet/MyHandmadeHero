@@ -44,9 +44,29 @@
         int BytesPerPixel;
     };
 
+    struct win32_window_dimension
+    {
+        int Width;
+        int Height;
+    };
+
+    RECT
+    GetWindowDimension(HWND Window, win32_window_dimension *WindowDimensions)
+    {
+        RECT ClientRect;
+        GetClientRect(Window, &ClientRect);
+        WindowDimensions->Width = ClientRect.right - ClientRect.left;
+        WindowDimensions->Height = ClientRect.bottom - ClientRect.top;
+        return ClientRect;
+    }
+
+
+
+
     //TODO: This is a global for now
     global_variable bool Running;
     global_variable win32_offscreen_buffer GlobalBackBuffer;
+    global_variable win32_window_dimension WindowDimensions;
 
 
     internal void
@@ -178,13 +198,8 @@
         {
             case WM_SIZE:
             {
-                RECT ClientRect;
-                GetClientRect(WindowHandle, &ClientRect);
-                int Width = ClientRect.right - ClientRect.left;
-                
-                // We look from the top of the screen! (think how an image is rendered usually - from l to r, t ot b)
-                int Height = ClientRect.bottom - ClientRect.top;
-                Win32ResizeDIBSection(&GlobalBackBuffer, Width, Height);
+                GetWindowDimension(WindowHandle, &WindowDimensions);
+                Win32ResizeDIBSection(&GlobalBackBuffer, WindowDimensions.Width, WindowDimensions.Height);
             } break;
 
             case WM_DESTROY:
@@ -228,12 +243,11 @@
                 LONG Width = Paint.rcPaint.right - Paint.rcPaint.left;
                 LONG Height = Paint.rcPaint.top - Paint.rcPaint.bottom;
 
-                RECT ClientRect;
-                GetClientRect(WindowHandle, &ClientRect);
-                Win32UpdateWindow(GlobalBackBuffer, DeviceContext, ClientRect, X, Y, Width, Height);
+                RECT ClientRect = GetWindowDimension(WindowHandle, &WindowDimensions);
+                Win32UpdateWindow(GlobalBackBuffer, DeviceContext, ClientRect, X, Y, WindowDimensions.Width, WindowDimensions.Height);
 
                 local_persist DWORD Operation = BLACKNESS;
-                PatBlt(DeviceContext, X, Y, Width, Height, Operation);
+                PatBlt(DeviceContext, X, Y, WindowDimensions.Width, WindowDimensions.Height, Operation);
                 switch(Operation)
                 {
                     case WHITENESS:
@@ -321,11 +335,8 @@
                     RenderWeirdGradient(GlobalBackBuffer, XOffset, YOffset);
 
                     HDC DeviceContext = GetDC(WindowHandle);
-                    RECT ClientRect;
-                    GetClientRect(WindowHandle, &ClientRect);
-                    int WindowWidth = ClientRect.right - ClientRect.left;
-                    int WindowHeight = ClientRect.bottom - ClientRect.top;
-                    Win32UpdateWindow(GlobalBackBuffer, DeviceContext, ClientRect, 0, 0, WindowWidth, WindowHeight);
+                    RECT ClientRect = GetWindowDimension(WindowHandle, &WindowDimensions);
+                    Win32UpdateWindow(GlobalBackBuffer, DeviceContext, ClientRect, 0, 0, WindowDimensions.Width, WindowDimensions.Height);
                     ReleaseDC(WindowHandle, DeviceContext);
 
                     ++XOffset;
