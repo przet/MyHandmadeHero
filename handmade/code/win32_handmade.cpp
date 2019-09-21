@@ -33,8 +33,6 @@
     typedef int32_t int32;
     typedef int64_t int64;
 
-    //TODO: This is a global for now
-    global_variable bool Running;
 
     struct win32_offscreen_buffer
     {
@@ -43,7 +41,11 @@
         int Width; 
         int Height; 
         int BytesPerPixel = 4;
-    } Buffer;
+    };
+
+    //TODO: This is a global for now
+    global_variable bool Running;
+    global_variable win32_offscreen_buffer GlobalBackBuffer;
 
 
     internal void
@@ -178,7 +180,7 @@
                 
                 // We look from the top of the screen! (think how an image is rendered usually - from l to r, t ot b)
                 int Height = ClientRect.bottom - ClientRect.top;
-                Win32ResizeDIBSection(&Buffer, Width, Height);
+                Win32ResizeDIBSection(&GlobalBackBuffer, Width, Height);
             } break;
 
             case WM_DESTROY:
@@ -224,7 +226,7 @@
 
                 RECT ClientRect;
                 GetClientRect(WindowHandle, &ClientRect);
-                Win32UpdateWindow(Buffer, DeviceContext, ClientRect, X, Y, Width, Height);
+                Win32UpdateWindow(GlobalBackBuffer, DeviceContext, ClientRect, X, Y, Width, Height);
 
                 local_persist DWORD Operation = BLACKNESS;
                 PatBlt(DeviceContext, X, Y, Width, Height, Operation);
@@ -312,14 +314,14 @@
                         DispatchMessageA(&Message);
                     }
 
-                    RenderWeirdGradient(&Buffer, XOffset, YOffset);
+                    RenderWeirdGradient(&GlobalBackBuffer, XOffset, YOffset);
 
                     HDC DeviceContext = GetDC(WindowHandle);
                     RECT ClientRect;
                     GetClientRect(WindowHandle, &ClientRect);
                     int WindowWidth = ClientRect.right - ClientRect.left;
                     int WindowHeight = ClientRect.bottom - ClientRect.top;
-                    Win32UpdateWindow(Buffer, DeviceContext, ClientRect, 0, 0, WindowWidth, WindowHeight);
+                    Win32UpdateWindow(GlobalBackBuffer, DeviceContext, ClientRect, 0, 0, WindowWidth, WindowHeight);
                     ReleaseDC(WindowHandle, DeviceContext);
 
                     ++XOffset;
