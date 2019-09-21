@@ -137,7 +137,10 @@
     }
 
     void
-    Win32UpdateWindow(win32_offscreen_buffer *Buffer, HDC DeviceContext, RECT WindowRect, int X , int Y, int Width, int Height)
+    // Alternate name could be DisplayBufferInWindow
+    // Passing by value - not changing Buffer
+    // See previous points re why it can be safer to pass by value
+    Win32UpdateWindow(win32_offscreen_buffer Buffer, HDC DeviceContext, RECT WindowRect, int X , int Y, int Width, int Height)
     {
         int WindowWidth = WindowRect.right - WindowRect.left;
         int WindowHeight = WindowRect.bottom - WindowRect.top;
@@ -149,10 +152,10 @@
                       X, Y, Width, Height,
                       */
                       // 0,0 to start at top left corner I believe
-                      0, 0, Buffer->Width, Buffer->Height,
+                      0, 0, Buffer.Width, Buffer.Height,
                       0, 0, WindowWidth, WindowHeight,
-                      Buffer->Memory,
-                      &Buffer->Info,
+                      Buffer.Memory,
+                      &Buffer.Info,
                       DIB_RGB_COLORS,
                       SRCCOPY); 
     }
@@ -221,7 +224,7 @@
 
                 RECT ClientRect;
                 GetClientRect(WindowHandle, &ClientRect);
-                Win32UpdateWindow(&Buffer, DeviceContext, ClientRect, X, Y, Width, Height);
+                Win32UpdateWindow(Buffer, DeviceContext, ClientRect, X, Y, Width, Height);
 
                 local_persist DWORD Operation = BLACKNESS;
                 PatBlt(DeviceContext, X, Y, Width, Height, Operation);
@@ -316,7 +319,7 @@
                     GetClientRect(WindowHandle, &ClientRect);
                     int WindowWidth = ClientRect.right - ClientRect.left;
                     int WindowHeight = ClientRect.bottom - ClientRect.top;
-                    Win32UpdateWindow(&Buffer, DeviceContext, ClientRect, 0, 0, WindowWidth, WindowHeight);
+                    Win32UpdateWindow(Buffer, DeviceContext, ClientRect, 0, 0, WindowWidth, WindowHeight);
                     ReleaseDC(WindowHandle, DeviceContext);
 
                     ++XOffset;
