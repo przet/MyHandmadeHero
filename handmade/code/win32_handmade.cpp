@@ -109,6 +109,7 @@
 
         Buffer->Width = Width;
         Buffer->Height = Height;
+        Buffer->BytesPerPixel = 4;
 
         // Specify our BitmapInfo structure attributes
         Buffer->Info.bmiHeader.biSize = sizeof(Buffer->Info.bmiHeader);
