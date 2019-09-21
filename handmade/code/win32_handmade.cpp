@@ -40,7 +40,7 @@
         void * Memory; 
         int Width; 
         int Height; 
-        int BytesPerPixel = 4;
+        int BytesPerPixel;
     };
 
     //TODO: This is a global for now
