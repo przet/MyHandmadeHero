@@ -172,8 +172,8 @@
                       X, Y, Width, Height,
                       */
                       // 0,0 to start at top left corner I believe
-                      0, 0, Buffer.Width, Buffer.Height,
                       0, 0, WindowWidth, WindowHeight,
+                      0, 0, Buffer.Width, Buffer.Height,
                       Buffer.Memory,
                       &Buffer.Info,
                       DIB_RGB_COLORS,
