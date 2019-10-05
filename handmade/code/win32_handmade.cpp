@@ -50,23 +50,22 @@
         int Height;
     };
 
-    RECT
-    GetWindowDimension(HWND Window, win32_window_dimension *WindowDimensions)
+    win32_window_dimension 
+    win32GetWindowDimension(HWND Window)
     {
-        RECT ClientRect;
+        win32_window_dimension Result;
+        RECT ClientRect; 
         GetClientRect(Window, &ClientRect);
-        WindowDimensions->Width = ClientRect.right - ClientRect.left;
-        WindowDimensions->Height = ClientRect.bottom - ClientRect.top;
-        return ClientRect;
+        Result.Width = ClientRect.right - ClientRect.left;
+        Result.Height = ClientRect.bottom - ClientRect.top;
+
+        return (Result);
     }
-
-
 
 
     //TODO: This is a global for now
     global_variable bool Running;
     global_variable win32_offscreen_buffer GlobalBackBuffer;
-    global_variable win32_window_dimension WindowDimensions;
 
 
     internal void
@@ -163,13 +162,8 @@
     }
 
     void
-    // Alternate name could be DisplayBufferInWindow
-    // Passing by value - not changing Buffer
-    // See previous points re why it can be safer to pass by value
-    Win32UpdateWindow(win32_offscreen_buffer Buffer, HDC DeviceContext, RECT WindowRect, int X , int Y, int Width, int Height)
+    Win32DisplayBufferInWindow(win32_offscreen_buffer Buffer, HDC DeviceContext, int WindowWidth, int WindowHeight, int X , int Y, int Width, int Height)
     {
-        int WindowWidth = WindowRect.right - WindowRect.left;
-        int WindowHeight = WindowRect.bottom - WindowRect.top;
         StretchDIBits(DeviceContext,
                       
                       /* Draw to whole window FIRST, leave this (subsection of window
@@ -198,8 +192,8 @@
         {
             case WM_SIZE:
             {
-                GetWindowDimension(WindowHandle, &WindowDimensions);
-                Win32ResizeDIBSection(&GlobalBackBuffer, WindowDimensions.Width, WindowDimensions.Height);
+                win32_window_dimension Dimension = win32GetWindowDimension(WindowHandle);
+                Win32ResizeDIBSection(&GlobalBackBuffer, Dimension.Width, Dimension.Height);
             } break;
 
             case WM_DESTROY:
@@ -243,11 +237,11 @@
                 LONG Width = Paint.rcPaint.right - Paint.rcPaint.left;
                 LONG Height = Paint.rcPaint.top - Paint.rcPaint.bottom;
 
-                RECT ClientRect = GetWindowDimension(WindowHandle, &WindowDimensions);
-                Win32UpdateWindow(GlobalBackBuffer, DeviceContext, ClientRect, X, Y, WindowDimensions.Width, WindowDimensions.Height);
+                win32_window_dimension Dimension = win32GetWindowDimension(WindowHandle);
+                Win32DisplayBufferInWindow(GlobalBackBuffer, DeviceContext, Dimension.Width, Dimension.Height, X, Y, Width, Height);
 
                 local_persist DWORD Operation = BLACKNESS;
-                PatBlt(DeviceContext, X, Y, WindowDimensions.Width, WindowDimensions.Height, Operation);
+                PatBlt(DeviceContext, X, Y, Dimension.Width, Dimension.Height, Operation);
                 switch(Operation)
                 {
                     case WHITENESS:
@@ -335,8 +329,8 @@
                     RenderWeirdGradient(GlobalBackBuffer, XOffset, YOffset);
 
                     HDC DeviceContext = GetDC(WindowHandle);
-                    RECT ClientRect = GetWindowDimension(WindowHandle, &WindowDimensions);
-                    Win32UpdateWindow(GlobalBackBuffer, DeviceContext, ClientRect, 0, 0, WindowDimensions.Width, WindowDimensions.Height);
+                    win32_window_dimension Dimension = win32GetWindowDimension(WindowHandle);
+                    Win32DisplayBufferInWindow(GlobalBackBuffer, DeviceContext, Dimension.Width, Dimension.Height, 0, 0, Dimension.Width, Dimension.Height);
                     ReleaseDC(WindowHandle, DeviceContext);
 
                     ++XOffset;
