@@ -2,3 +2,7 @@
 - Also, I _think_ Casey says something about RECT being reasonably small...but is it? 4 x LONG which is 4 x 4  = 16 bytes I believe
 - Around 12:25 - the redefn of variables in a loop discussion (incld destructor/ctor when dealing with classes)
 - 33:51 (a bit before) - the segfault. Bitmap->Memory gets value 0x000000 - so can't write to location 0 (in virtual mem)? Protected?
+- PatBlt(DeviceContext, X, Y, Dimension.Width, Dimension.Height, Operation):
+     This gets removed (I didn't catch when, or it was not mentioned): see the difference.
+     Also see the difference if I pass in Width (=Paint.rcPaint.right-....) and Height instead of 
+     Dimension.Width and Dimension.Height
