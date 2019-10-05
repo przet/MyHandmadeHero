@@ -192,8 +192,6 @@
         {
             case WM_SIZE:
             {
-                win32_window_dimension Dimension = win32GetWindowDimension(WindowHandle);
-                Win32ResizeDIBSection(&GlobalBackBuffer, Dimension.Width, Dimension.Height);
             } break;
 
             case WM_DESTROY:
@@ -285,6 +283,8 @@
         int * IntPtr = 0;
         
         WNDCLASS WindowClass = {}; 
+
+        Win32ResizeDIBSection(&GlobalBackBuffer, 1280, 720);
 
         WindowClass.style = CS_HREDRAW | CS_VREDRAW;
 
