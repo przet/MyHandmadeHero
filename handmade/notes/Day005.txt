@@ -6,3 +6,4 @@
      This gets removed (I didn't catch when, or it was not mentioned): see the difference.
      Also see the difference if I pass in Width (=Paint.rcPaint.right-....) and Height instead of 
      Dimension.Width and Dimension.Height
+- Investigate the StretchDIBits bug - why did it not manifest before - casey mentioned because it was the same ... understand this (~45min)
