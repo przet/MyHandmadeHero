@@ -64,7 +64,7 @@
 
 
     //TODO: This is a global for now
-    global_variable bool Running;
+    global_variable bool GlobalRunning;
     global_variable win32_offscreen_buffer GlobalBackBuffer;
 
 
@@ -198,13 +198,13 @@
             case WM_DESTROY:
             {
                 //TODO: Handle this as an error - recreate window?
-                Running = false;
+                GlobalRunning = false;
             } break;
 
             case WM_CLOSE:
             {
                 //TODO: Handle this with a message to the user?
-                Running = false;
+                GlobalRunning = false;
             } break;
 
             case WM_CREATE:
@@ -313,14 +313,14 @@
                 int XOffset = 0;
                 int YOffset = 0;
                 MSG Message;
-                Running = true;
-                while(Running)
+                GlobalRunning = true;
+                while(GloablRunning)
                 {
                     while (PeekMessageA(&Message,0,0,0,PM_REMOVE))
                     {
                         if (Message.message == WM_QUIT)
                         {
-                            Running = false;
+                            GlobalRunning = false;
                         }
                             
                         TranslateMessage(&Message);
