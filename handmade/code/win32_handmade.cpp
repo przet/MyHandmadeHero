@@ -314,7 +314,7 @@
                 int YOffset = 0;
                 MSG Message;
                 GlobalRunning = true;
-                while(GloablRunning)
+                while(GlobalRunning)
                 {
                     while (PeekMessageA(&Message,0,0,0,PM_REMOVE))
                     {
