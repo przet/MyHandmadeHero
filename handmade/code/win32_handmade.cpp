@@ -162,7 +162,7 @@
     }
 
     void
-    Win32DisplayBufferInWindow(win32_offscreen_buffer Buffer, HDC DeviceContext, int WindowWidth, int WindowHeight, int X , int Y, int Width, int Height)
+    Win32DisplayBufferInWindow(win32_offscreen_buffer Buffer, HDC DeviceContext, int WindowWidth, int WindowHeight)
     {
         // TODO: Aspect ratio correction
         StretchDIBits(DeviceContext,
@@ -231,16 +231,11 @@
             {
                 PAINTSTRUCT Paint;
                 HDC DeviceContext = BeginPaint(WindowHandle, &Paint);
-                LONG X = Paint.rcPaint.left;
-                LONG Y = Paint.rcPaint.right;
-                LONG Width = Paint.rcPaint.right - Paint.rcPaint.left;
-                LONG Height = Paint.rcPaint.top - Paint.rcPaint.bottom;
-
                 win32_window_dimension Dimension = win32GetWindowDimension(WindowHandle);
-                Win32DisplayBufferInWindow(GlobalBackBuffer, DeviceContext, Dimension.Width, Dimension.Height, X, Y, Width, Height);
+                Win32DisplayBufferInWindow(GlobalBackBuffer, DeviceContext, Dimension.Width, Dimension.Height);
 
                 local_persist DWORD Operation = BLACKNESS;
-                PatBlt(DeviceContext, X, Y, Dimension.Width, Dimension.Height, Operation);
+                PatBlt(DeviceContext, 0, 0, Dimension.Width, Dimension.Height, Operation);
                 switch(Operation)
                 {
                     case WHITENESS:
@@ -331,7 +326,7 @@
 
                     HDC DeviceContext = GetDC(WindowHandle);
                     win32_window_dimension Dimension = win32GetWindowDimension(WindowHandle);
-                    Win32DisplayBufferInWindow(GlobalBackBuffer, DeviceContext, Dimension.Width, Dimension.Height, 0, 0, Dimension.Width, Dimension.Height);
+                    Win32DisplayBufferInWindow(GlobalBackBuffer, DeviceContext, Dimension.Width, Dimension.Height);
                     ReleaseDC(WindowHandle, DeviceContext);
 
                     ++XOffset;

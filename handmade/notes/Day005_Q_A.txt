@@ -1,2 +1,5 @@
 - 1:59 ish Casey discusses OWNDC however I found that having no OWNDC flag on the window style still does not require a release of the DC
 - Have a look at what happens when you remove case WM_PAINT body, and case altogether (forcing default case to be hit) both in the debugger and the actualy application (how it draws)
+- 1:55 and prior : pointer aliasing and compiler optimisation
+- < 2hrs, Casey removes the "partial" repainting but not as much explanation as I would like
+- 2:05: const meaningless to the compiler
