@@ -1,0 +1,13 @@
+- Around ~9min and before, Casey talks about pointer aliasing (this is when we are changing from RECT* to RECT in win32UpdateWindow(....)
+- Also, I _think_ Casey says something about RECT being reasonably small...but is it? 4 x LONG which is 4 x 4  = 16 bytes I believe
+- Around 12:25 - the redefn of variables in a loop discussion (incld destructor/ctor when dealing with classes)
+- 33:51 (a bit before) - the segfault. Bitmap->Memory gets value 0x000000 - so can't write to location 0 (in virtual mem)? Protected?
+- PatBlt(DeviceContext, X, Y, Dimension.Width, Dimension.Height, Operation):
+     This gets removed (I didn't catch when, or it was not mentioned): see the difference.
+     Also see the difference if I pass in Width (=Paint.rcPaint.right-....) and Height instead of 
+     Dimension.Width and Dimension.Height
+- Calling ResizeDIBsection once on start (not in WM_SIZE) - observe how the speed changes (slowly) on minimise, versus before when smaller => faster, larger=>slower     
+- Around 1hr 5 min 49 sec, Casey discusses things about page size and virtual alloc - come back to this
+- 1:08:23 re pointers identifying memory only in the _process_ address space (not _system_ as a whole)
+- 1:16:58 ish - you know how when debugging on windows, if you try to rebuild you will get link error (as the process is running) - Well apparently on unix/linux that is not the case! And Casey mentions inodes as the concept why
+- Around 1:22:xx Windows default redraw and flooding with WM_paint messages if you don't handle that message case
