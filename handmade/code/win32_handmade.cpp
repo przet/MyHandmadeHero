@@ -8,6 +8,7 @@
 
     #include <windows.h>
     #include <stdint.h> //uint8_t
+    #include <xinput.h>
 
     // Undefine the following to forcce use of ANSI or UNICODE versions - we will always use ANSI,
     // so doing the below will: 1) make us use suffix A 2) If someone tries to compile in Unicode mode, an error will occur (good)
@@ -62,6 +63,26 @@
         return (Result);
     }
 
+        #define X_INPUT_GET_STATE(functionName) DWORD WINAPI functionName(DWORD dwUserIndex, XINPUT_STATE* pState)
+        #define X_INPUT_SET_STATE(functionName) DWORD WINAPI functionName(DWORD dwUserIndex, XINPUT_VIBRATION* pVibration)
+	typedef X_INPUT_GET_STATE(x_input_get_state);
+	typedef X_INPUT_SET_STATE(x_input_set_state);
+        
+        X_INPUT_GET_STATE(XInputGetStateStub)
+        {
+            return 0;
+        }
+
+        X_INPUT_SET_STATE(XInputSetStateStub)
+        {
+            return 0;
+        }
+
+
+	global_variable x_input_get_state* XInputGetState_ = XInputGetStateStub;
+	global_variable x_input_set_state* XInputSetState_ = XInputSetStateStub;
+	#define XInputGetState XInputGetState_
+	#define XInputSetState XInputSetState_
 
     //TODO: This is a global for now
     global_variable bool GlobalRunning;
@@ -321,6 +342,45 @@
                         TranslateMessage(&Message);
                         DispatchMessageA(&Message);
                     }
+
+					// TODO should we poll more frequently? Xinput only gives back the state of the controller if we ask for it.
+					DWORD dwResult;
+					for (DWORD i=0; i < XUSER_MAX_COUNT; ++i)
+					{
+						XINPUT_STATE state;
+						ZeroMemory(&state, sizeof(XINPUT_STATE));
+
+						dwResult = XInputGetState(i, &state);
+
+						if (dwResult == ERROR_SUCCESS)
+						{
+							// Controller connected
+							// TODO: See if ControllerState.dwPacketNumber increments too rapidly
+							XINPUT_GAMEPAD* pad = &state.Gamepad;
+
+							bool dPadUp		 			= 			pad->wButtons & XINPUT_GAMEPAD_DPAD_UP;
+							bool dPadDown	 			= 			pad->wButtons & XINPUT_GAMEPAD_DPAD_DOWN;
+							bool dPadRight	 			= 			pad->wButtons & XINPUT_GAMEPAD_DPAD_RIGHT;
+							bool dPadLeft	 			= 			pad->wButtons & XINPUT_GAMEPAD_DPAD_LEFT;
+							bool gPadStart	 			= 			pad->wButtons & XINPUT_GAMEPAD_START;
+							bool gPadBack    			= 			pad->wButtons & XINPUT_GAMEPAD_BACK;
+							bool gPadLeftShoulder   	= 			pad->wButtons & XINPUT_GAMEPAD_LEFT_SHOULDER;
+							bool gPadRightShoulder  	= 			pad->wButtons & XINPUT_GAMEPAD_RIGHT_SHOULDER;
+							bool gPadA					= 			pad->wButtons & XINPUT_GAMEPAD_A;
+							bool gPadB					= 			pad->wButtons & XINPUT_GAMEPAD_B;
+							bool dPadX			    	= 			pad->wButtons & XINPUT_GAMEPAD_X;
+							bool dPadY			    	= 			pad->wButtons & XINPUT_GAMEPAD_Y;
+
+							int16 lStickX = pad->sThumbLX;
+							int16 lStickY = pad->sThumbLY;
+
+						}
+						else
+						{
+							// Controller not connected
+						}
+					
+					}
 
                     RenderWeirdGradient(GlobalBackBuffer, XOffset, YOffset);
 
