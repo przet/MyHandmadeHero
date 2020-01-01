@@ -9,47 +9,12 @@
     #include <windows.h>
     #include <stdint.h> //uint8_t
     #include <xinput.h>
-
-    // Undefine the following to forcce use of ANSI or UNICODE versions - we will always use ANSI,
-    // so doing the below will: 1) make us use suffix A 2) If someone tries to compile in Unicode mode, an error will occur (good)
-    #undef CreateWindowEx
-    #undef OutputDebugString
-    #undef TranslateMessage
-    #undef DispatchMessage
-    #undef DefWindowProc 
-    #undef PeekMessage 
-
-    #define internal static 
-    #define local_persist static
-    #define global_variable static
-
-    // Platform (machine) independent size
-    typedef uint8_t uint8;
-    typedef uint16_t uint16;
-    typedef uint32_t uint32;
-    typedef uint64_t uint64;
-
-    typedef int8_t int8;
-    typedef int16_t int16;
-    typedef int32_t int32;
-    typedef int64_t int64;
-
-
-    struct win32_offscreen_buffer
-    {
-        BITMAPINFO Info; 
-        void * Memory; 
-        int Width; 
-        int Height; 
-        int Pitch; 
-        int BytesPerPixel;
-    };
-
-    struct win32_window_dimension
-    {
-        int Width;
-        int Height;
-    };
+    #include "Defines.h"
+    #include "Typedefs.h"
+    #include "Structures.h"
+    #include "RenderWeirdGradient.h"
+    #include "DisplayBufferInWindow.h"
+    #include "ResizeDIBSection.h"
 
     win32_window_dimension 
     win32GetWindowDimension(HWND Window)
@@ -63,11 +28,6 @@
         return (Result);
     }
 
-    #define X_INPUT_GET_STATE(functionName) DWORD WINAPI functionName(DWORD dwUserIndex, XINPUT_STATE* pState)
-    #define X_INPUT_SET_STATE(functionName) DWORD WINAPI functionName(DWORD dwUserIndex, XINPUT_VIBRATION* pVibration)
-    typedef X_INPUT_GET_STATE(x_input_get_state);
-    typedef X_INPUT_SET_STATE(x_input_set_state);
-
     X_INPUT_GET_STATE(XInputGetStateStub)
     {
         return 0;
@@ -78,11 +38,8 @@
         return 0;
     }
 
-
     global_variable x_input_get_state* XInputGetState_ = XInputGetStateStub;
     global_variable x_input_set_state* XInputSetState_ = XInputSetStateStub;
-    #define XInputGetState XInputGetState_
-    #define XInputSetState XInputSetState_
 
     internal void
     Win32LoadXInput(void)
@@ -96,124 +53,9 @@
 
     }
 
-
     //TODO: This is a global for now
     global_variable bool GlobalRunning;
     global_variable win32_offscreen_buffer GlobalBackBuffer;
-
-
-    internal void
-    RenderWeirdGradient(win32_offscreen_buffer Buffer, int XOffset, int YOffset)
-    {
-
-        // TODO : See what optimizer does (with pass by value of buffer??)
-        
-        // casting void to char type (want per byte arithmetic)
-        uint8 *Row = (uint8 *)Buffer.Memory;
-
-        for (int Y = 0; Y < Buffer.Height; ++Y)
-        {
-            uint32 *Pixel = (uint32 *)Row;
-            for (int X = 0; X < Buffer.Width; ++X)
-            {
-                // Explanation:
-                // 
-                // Memory(hex) : BB GG RR xx (xx is pad)
-                // Register (hex. Assuming little endian architecture) xx RR GG BB
-                //
-                // So now that we are dealing with 32 bits directly (i.e 32-bit pixel) we rewrite
-
-                /*
-                    *Pixel++ = X + XOffset;
-
-                    *Pixel++ = Y + YOffset;
-
-                    *Pixel++ = 0;
-
-                    *Pixel++ = 0;
-                */
-
-                // as
-                uint8 Blue = X + XOffset;
-                uint8 Green = Y + YOffset;
-                uint8 Red = 0;
-                uint8 Pad = 0;
-
-                *Pixel++ = (Blue | Green << 8 | Red << 16 | Pad << 24);
-                // TODO : operator precedence : remove brackets
-            }
-
-            Row += Buffer.Pitch;
-            // TODO Casey makes a comment here that the separation of operations (Row adding and Pixel)
-            // may seem inefficient, we do ++Pixel because sometimes byte boundaries may differ(??).
-            // Its < 33:30
-        }
-
-    }
-
-
-    internal void
-    Win32ResizeDIBSection(win32_offscreen_buffer *Buffer, int Width , int Height)
-    {
-
-        if (Buffer->Memory)
-        {
-            VirtualFree(Buffer->Memory, 0, MEM_RELEASE);
-        }
-
-        Buffer->Width = Width;
-        Buffer->Height = Height;
-        Buffer->BytesPerPixel = 4;
-
-        // Specify our BitmapInfo structure attributes
-        Buffer->Info.bmiHeader.biSize = sizeof(Buffer->Info.bmiHeader);
-        Buffer->Info.bmiHeader.biWidth = Buffer->Width;
-        
-        // Top down so negative (see MSDN)
-        Buffer->Info.bmiHeader.biHeight = -Buffer->Height;
-        Buffer->Info.bmiHeader.biPlanes = 1;
-        
-        // 32 for 4byte alignment (24  =3 bytes; 1 more byte for this "padding" to give 
-        // alignment on 4 byte boundary (x86 architecture efficiency)
-        Buffer->Info.bmiHeader.biBitCount = 32;
-        Buffer->Info.bmiHeader.biCompression = BI_RGB;
-        Buffer->Info.bmiHeader.biSizeImage = 0;
-        Buffer->Info.bmiHeader.biXPelsPerMeter = 0;
-        Buffer->Info.bmiHeader.biYPelsPerMeter = 0;
-        Buffer->Info.bmiHeader.biClrUsed = 0;
-        Buffer->Info.bmiHeader.biClrImportant = 0;
-
-        int BitmapMemorySize = (Buffer->Width*Buffer->Height)*Buffer->BytesPerPixel;
-
-        // VirtualAlloc returns pages - a bit more "raw" than HeapAlloc
-        Buffer->Memory = VirtualAlloc(0, BitmapMemorySize, MEM_COMMIT, PAGE_READWRITE);
-
-        Buffer->Pitch = Buffer->Width*Buffer->BytesPerPixel;
-
-        //TODO : we might want to initialise this to black 
-
-
-    }
-
-    void
-    Win32DisplayBufferInWindow(win32_offscreen_buffer Buffer, HDC DeviceContext, int WindowWidth, int WindowHeight)
-    {
-        // TODO: Aspect ratio correction
-        StretchDIBits(DeviceContext,
-                      
-                      /* Draw to whole window FIRST, leave this (subsection of window
-                       * to later...
-                      X, Y, Width, Height,
-                      X, Y, Width, Height,
-                      */
-                      // 0,0 to start at top left corner I believe
-                      0, 0, WindowWidth, WindowHeight,
-                      0, 0, Buffer.Width, Buffer.Height,
-                      Buffer.Memory,
-                      &Buffer.Info,
-                      DIB_RGB_COLORS,
-                      SRCCOPY); 
-    }
 
     LRESULT CALLBACK
     MainWindowCallback(HWND WindowHandle,
