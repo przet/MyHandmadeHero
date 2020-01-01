@@ -63,38 +63,38 @@
         return (Result);
     }
 
-	#define X_INPUT_GET_STATE(functionName) DWORD WINAPI functionName(DWORD dwUserIndex, XINPUT_STATE* pState)
-	#define X_INPUT_SET_STATE(functionName) DWORD WINAPI functionName(DWORD dwUserIndex, XINPUT_VIBRATION* pVibration)
-	typedef X_INPUT_GET_STATE(x_input_get_state);
-	typedef X_INPUT_SET_STATE(x_input_set_state);
+    #define X_INPUT_GET_STATE(functionName) DWORD WINAPI functionName(DWORD dwUserIndex, XINPUT_STATE* pState)
+    #define X_INPUT_SET_STATE(functionName) DWORD WINAPI functionName(DWORD dwUserIndex, XINPUT_VIBRATION* pVibration)
+    typedef X_INPUT_GET_STATE(x_input_get_state);
+    typedef X_INPUT_SET_STATE(x_input_set_state);
 
-	X_INPUT_GET_STATE(XInputGetStateStub)
-	{
-	    return 0;
-	}
+    X_INPUT_GET_STATE(XInputGetStateStub)
+    {
+        return 0;
+    }
 
-	X_INPUT_SET_STATE(XInputSetStateStub)
-	{
-	    return 0;
-	}
+    X_INPUT_SET_STATE(XInputSetStateStub)
+    {
+        return 0;
+    }
 
 
-	global_variable x_input_get_state* XInputGetState_ = XInputGetStateStub;
-	global_variable x_input_set_state* XInputSetState_ = XInputSetStateStub;
-	#define XInputGetState XInputGetState_
-	#define XInputSetState XInputSetState_
+    global_variable x_input_get_state* XInputGetState_ = XInputGetStateStub;
+    global_variable x_input_set_state* XInputSetState_ = XInputSetStateStub;
+    #define XInputGetState XInputGetState_
+    #define XInputSetState XInputSetState_
 
-	internal void
-	Win32LoadXInput(void)
-	{
-		HMODULE XInputLibrary = LoadLibrary("xinput1_3.dll");
-		if (XInputLibrary)
-		{
-			XInputGetState = (x_input_get_state*)GetProcAddress(XInputLibrary, "XInputGetState");
-			XInputSetState = (x_input_set_state*)GetProcAddress(XInputLibrary, "XInputSetState");
-		}
+    internal void
+    Win32LoadXInput(void)
+    {
+        HMODULE XInputLibrary = LoadLibrary("xinput1_3.dll");
+        if (XInputLibrary)
+        {
+            XInputGetState = (x_input_get_state*)GetProcAddress(XInputLibrary, "XInputGetState");
+            XInputSetState = (x_input_set_state*)GetProcAddress(XInputLibrary, "XInputSetState");
+        }
 
-	}
+    }
 
 
     //TODO: This is a global for now
@@ -261,38 +261,38 @@
                 OutputDebugStringA("WM_ACTIVATEAPP\n");
             } break;
 
-			case WM_KEYDOWN:case WM_KEYUP:
+            case WM_KEYDOWN:case WM_KEYUP:
             {
                 uint32 VKCode = WParam;
                 bool WasDown = ((LParam & (1 << 30)) != 0);
                 bool IsDown = ((LParam & (1 << 31)) == 0);
 
-				// Ignore key repeat messages
-				if (IsDown != WasDown)
-				{
-					if (VKCode == VK_ESCAPE)
-					{
-				    	if (WasDown)
-						{
-							OutputDebugStringA("ESC Was Down\n");
-						}
-						else 
-						{
-							OutputDebugStringA("ESC Was Up \n");
-						}
+                // Ignore key repeat messages
+                if (IsDown != WasDown)
+                {
+                    if (VKCode == VK_ESCAPE)
+                    {
+                        if (WasDown)
+                        {
+                            OutputDebugStringA("ESC Was Down\n");
+                        }
+                        else 
+                        {
+                            OutputDebugStringA("ESC Was Up \n");
+                        }
 
-						if (IsDown)
-						{
-							OutputDebugStringA("ESC Is Down\n");
-						}
-						else 
-						{
-							OutputDebugStringA("ESC is Up\n");
-						}
+                        if (IsDown)
+                        {
+                            OutputDebugStringA("ESC Is Down\n");
+                        }
+                        else 
+                        {
+                            OutputDebugStringA("ESC is Up\n");
+                        }
 
-						OutputDebugStringA("-----------------\n");
-					}
-				}
+                        OutputDebugStringA("-----------------\n");
+                    }
+                }
             } break;
 
             case WM_PAINT:
@@ -391,44 +391,44 @@
                         DispatchMessageA(&Message);
                     }
 
-					// TODO should we poll more frequently? Xinput only gives back the state of the controller if we ask for it.
-					DWORD dwResult;
-					for (DWORD i=0; i < XUSER_MAX_COUNT; ++i)
-					{
-						XINPUT_STATE state;
-						ZeroMemory(&state, sizeof(XINPUT_STATE));
+                    // TODO should we poll more frequently? Xinput only gives back the state of the controller if we ask for it.
+                    DWORD dwResult;
+                    for (DWORD i=0; i < XUSER_MAX_COUNT; ++i)
+                    {
+                        XINPUT_STATE state;
+                        ZeroMemory(&state, sizeof(XINPUT_STATE));
 
-						dwResult = XInputGetState(i, &state);
+                        dwResult = XInputGetState(i, &state);
 
-						if (dwResult == ERROR_SUCCESS)
-						{
-							// Controller connected
-							// TODO: See if ControllerState.dwPacketNumber increments too rapidly
-							XINPUT_GAMEPAD* pad = &state.Gamepad;
+                        if (dwResult == ERROR_SUCCESS)
+                        {
+                            // Controller connected
+                            // TODO: See if ControllerState.dwPacketNumber increments too rapidly
+                            XINPUT_GAMEPAD* pad = &state.Gamepad;
 
-							bool dPadUp		 			= 			pad->wButtons & XINPUT_GAMEPAD_DPAD_UP;
-							bool dPadDown	 			= 			pad->wButtons & XINPUT_GAMEPAD_DPAD_DOWN;
-							bool dPadRight	 			= 			pad->wButtons & XINPUT_GAMEPAD_DPAD_RIGHT;
-							bool dPadLeft	 			= 			pad->wButtons & XINPUT_GAMEPAD_DPAD_LEFT;
-							bool gPadStart	 			= 			pad->wButtons & XINPUT_GAMEPAD_START;
-							bool gPadBack    			= 			pad->wButtons & XINPUT_GAMEPAD_BACK;
-							bool gPadLeftShoulder   	= 			pad->wButtons & XINPUT_GAMEPAD_LEFT_SHOULDER;
-							bool gPadRightShoulder  	= 			pad->wButtons & XINPUT_GAMEPAD_RIGHT_SHOULDER;
-							bool gPadA					= 			pad->wButtons & XINPUT_GAMEPAD_A;
-							bool gPadB					= 			pad->wButtons & XINPUT_GAMEPAD_B;
-							bool dPadX			    	= 			pad->wButtons & XINPUT_GAMEPAD_X;
-							bool dPadY			    	= 			pad->wButtons & XINPUT_GAMEPAD_Y;
+                            bool dPadUp                     =             pad->wButtons & XINPUT_GAMEPAD_DPAD_UP;
+                            bool dPadDown                 =             pad->wButtons & XINPUT_GAMEPAD_DPAD_DOWN;
+                            bool dPadRight                 =             pad->wButtons & XINPUT_GAMEPAD_DPAD_RIGHT;
+                            bool dPadLeft                 =             pad->wButtons & XINPUT_GAMEPAD_DPAD_LEFT;
+                            bool gPadStart                 =             pad->wButtons & XINPUT_GAMEPAD_START;
+                            bool gPadBack                =             pad->wButtons & XINPUT_GAMEPAD_BACK;
+                            bool gPadLeftShoulder       =             pad->wButtons & XINPUT_GAMEPAD_LEFT_SHOULDER;
+                            bool gPadRightShoulder      =             pad->wButtons & XINPUT_GAMEPAD_RIGHT_SHOULDER;
+                            bool gPadA                    =             pad->wButtons & XINPUT_GAMEPAD_A;
+                            bool gPadB                    =             pad->wButtons & XINPUT_GAMEPAD_B;
+                            bool dPadX                    =             pad->wButtons & XINPUT_GAMEPAD_X;
+                            bool dPadY                    =             pad->wButtons & XINPUT_GAMEPAD_Y;
 
-							int16 lStickX = pad->sThumbLX;
-							int16 lStickY = pad->sThumbLY;
+                            int16 lStickX = pad->sThumbLX;
+                            int16 lStickY = pad->sThumbLY;
 
-						}
-						else
-						{
-							// Controller not connected
-						}
-					
-					}
+                        }
+                        else
+                        {
+                            // Controller not connected
+                        }
+                    
+                    }
 
                     RenderWeirdGradient(GlobalBackBuffer, XOffset, YOffset);
 
