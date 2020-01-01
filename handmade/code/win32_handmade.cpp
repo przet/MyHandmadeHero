@@ -63,26 +63,39 @@
         return (Result);
     }
 
-        #define X_INPUT_GET_STATE(functionName) DWORD WINAPI functionName(DWORD dwUserIndex, XINPUT_STATE* pState)
-        #define X_INPUT_SET_STATE(functionName) DWORD WINAPI functionName(DWORD dwUserIndex, XINPUT_VIBRATION* pVibration)
+	#define X_INPUT_GET_STATE(functionName) DWORD WINAPI functionName(DWORD dwUserIndex, XINPUT_STATE* pState)
+	#define X_INPUT_SET_STATE(functionName) DWORD WINAPI functionName(DWORD dwUserIndex, XINPUT_VIBRATION* pVibration)
 	typedef X_INPUT_GET_STATE(x_input_get_state);
 	typedef X_INPUT_SET_STATE(x_input_set_state);
-        
-        X_INPUT_GET_STATE(XInputGetStateStub)
-        {
-            return 0;
-        }
 
-        X_INPUT_SET_STATE(XInputSetStateStub)
-        {
-            return 0;
-        }
+	X_INPUT_GET_STATE(XInputGetStateStub)
+	{
+	    return 0;
+	}
+
+	X_INPUT_SET_STATE(XInputSetStateStub)
+	{
+	    return 0;
+	}
 
 
 	global_variable x_input_get_state* XInputGetState_ = XInputGetStateStub;
 	global_variable x_input_set_state* XInputSetState_ = XInputSetStateStub;
 	#define XInputGetState XInputGetState_
 	#define XInputSetState XInputSetState_
+
+	internal void
+	Win32LoadXInput(void)
+	{
+		HMODULE XInputLibrary = LoadLibrary("xinput1_3.dll");
+		if (XInputLibrary)
+		{
+			XInputGetState = (x_input_get_state*)GetProcAddress(XInputLibrary, "XInputGetState");
+			XInputSetState = (x_input_set_state*)GetProcAddress(XInputLibrary, "XInputSetState");
+		}
+
+	}
+
 
     //TODO: This is a global for now
     global_variable bool GlobalRunning;
@@ -248,6 +261,40 @@
                 OutputDebugStringA("WM_ACTIVATEAPP\n");
             } break;
 
+			case WM_KEYDOWN:case WM_KEYUP:
+            {
+                uint32 VKCode = WParam;
+                bool WasDown = ((LParam & (1 << 30)) != 0);
+                bool IsDown = ((LParam & (1 << 31)) == 0);
+
+				// Ignore key repeat messages
+				if (IsDown != WasDown)
+				{
+					if (VKCode == VK_ESCAPE)
+					{
+				    	if (WasDown)
+						{
+							OutputDebugStringA("ESC Was Down\n");
+						}
+						else 
+						{
+							OutputDebugStringA("ESC Was Up \n");
+						}
+
+						if (IsDown)
+						{
+							OutputDebugStringA("ESC Is Down\n");
+						}
+						else 
+						{
+							OutputDebugStringA("ESC is Up\n");
+						}
+
+						OutputDebugStringA("-----------------\n");
+					}
+				}
+            } break;
+
             case WM_PAINT:
             {
                 PAINTSTRUCT Paint;
@@ -297,6 +344,7 @@
            LPSTR CmdLine,
            int ShowCmd)
     {
+        Win32LoadXInput();
         int * IntPtr = 0;
         
         WNDCLASS WindowClass = {}; 
