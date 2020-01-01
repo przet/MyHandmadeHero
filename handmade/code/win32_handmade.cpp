@@ -166,7 +166,7 @@
                     }
                     
 
-                    RenderWeirdGradient(GlobalBackBuffer, XOffset, YOffset);
+                    RenderWeirdGradient(&GlobalBackBuffer, XOffset, YOffset);
 
                     HDC DeviceContext = GetDC(WindowHandle);
                     win32_window_dimension Dimension = win32GetWindowDimension(WindowHandle);

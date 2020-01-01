@@ -1,16 +1,16 @@
 internal void
-RenderWeirdGradient(win32_offscreen_buffer Buffer, int XOffset, int YOffset)
+RenderWeirdGradient(win32_offscreen_buffer* Buffer, int XOffset, int YOffset)
 {
 
     // TODO : See what optimizer does (with pass by value of buffer??)
 
     // casting void to char type (want per byte arithmetic)
-    uint8* Row = (uint8*)Buffer.Memory;
+    uint8* Row = (uint8*)Buffer->Memory;
 
-    for (int Y = 0; Y < Buffer.Height; ++Y)
+    for (int Y = 0; Y < Buffer->Height; ++Y)
     {
         uint32* Pixel = (uint32*)Row;
-        for (int X = 0; X < Buffer.Width; ++X)
+        for (int X = 0; X < Buffer->Width; ++X)
         {
             // Explanation:
             // 
@@ -39,7 +39,7 @@ RenderWeirdGradient(win32_offscreen_buffer Buffer, int XOffset, int YOffset)
             // TODO : operator precedence : remove brackets
         }
 
-        Row += Buffer.Pitch;
+        Row += Buffer->Pitch;
         // TODO Casey makes a comment here that the separation of operations (Row adding and Pixel)
         // may seem inefficient, we do ++Pixel because sometimes byte boundaries may differ(??).
         // Its < 33:30
