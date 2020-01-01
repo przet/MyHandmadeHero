@@ -66,6 +66,8 @@
                 int YOffset = 0;
                 MSG Message;
                 GlobalRunning = true;
+                bool Moving = true;
+
                 while(GlobalRunning)
                 {
                     while (PeekMessageA(&Message,0,0,0,PM_REMOVE))
@@ -73,6 +75,27 @@
                         if (Message.message == WM_QUIT)
                         {
                             GlobalRunning = false;
+                        }
+                        switch (Message.message)
+                        {
+                            case WM_KEYDOWN:case WM_KEYUP:
+                            {
+                                uint32 VKCode = Message.wParam;
+                                bool WasDown = ((Message.lParam & (1 << 30)) != 0);
+                                bool IsDown = ((Message.lParam & (1 << 31)) == 0);
+                                if (VKCode == VK_SPACE || VKCode == 'P')
+                                {
+                                    if (!WasDown && IsDown)
+                                    {
+                                        Moving = !Moving;
+                                    }
+                                }
+                            }break;
+
+                            default:
+                            {
+                                //
+                            }break;
                         }
                             
                         TranslateMessage(&Message);
@@ -117,6 +140,7 @@
                         }
                     
                     }
+                    
 
                     RenderWeirdGradient(GlobalBackBuffer, XOffset, YOffset);
 
@@ -125,7 +149,10 @@
                     Win32DisplayBufferInWindow(GlobalBackBuffer, DeviceContext, Dimension.Width, Dimension.Height);
                     ReleaseDC(WindowHandle, DeviceContext);
 
-                    ++XOffset;
+                    if (Moving)
+                    {
+                        ++XOffset;
+                    }
 
                 }
             }
