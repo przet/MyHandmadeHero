@@ -1,0 +1,9 @@
+- In VS2019 if I build in debug 64 I get a msvccrtd.lib unresolved external...looks like crt libraryd for 64 bit is not included 
+(or something to make it work). We have user32.lib and Gdi32.lib included. Maybe we need the 64 bit versions if we wanted to build
+in 64? 
+- does it matter what initial value of waswasdown is?
+- why did the uint lparam not work? 
+- WasWasDown Needed to be WasDown NOT Is Down (WasWasDown is to represent the 3rd state - the state before the previous state. )
+
+-----
+- how does WPARAM/LPARAM work (polymorphically)
