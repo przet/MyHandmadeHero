@@ -19,6 +19,7 @@
     #include "MainWindowCallback.h"
     #include "XInputStubs.h"
     #include "LoadXInput.h"
+    #include <stdio.h>
 
     extern x_input_get_state* XInputGetState_;
     extern x_input_set_state* XInputSetState_;
@@ -67,11 +68,15 @@
                 MSG Message;
                 GlobalRunning = true;
                 bool Moving = true;
+                bool WasWasDown = true;
 
                 while(GlobalRunning)
                 {
+                    OutputDebugStringA("GlobalRunning\n");
+                    int count = 0;
                     while (PeekMessageA(&Message,0,0,0,PM_REMOVE))
                     {
+                        OutputDebugStringA("Peeking at message\n");
                         if (Message.message == WM_QUIT)
                         {
                             GlobalRunning = false;
@@ -83,13 +88,32 @@
                                 uint32 VKCode = Message.wParam;
                                 bool WasDown = ((Message.lParam & (1 << 30)) != 0);
                                 bool IsDown = ((Message.lParam & (1 << 31)) == 0);
+
                                 if (VKCode == VK_SPACE || VKCode == 'P')
                                 {
                                     if (!WasDown && IsDown)
                                     {
                                         Moving = !Moving;
+                                        OutputDebugStringA("Space !WasDown && IsDown\n");
                                     }
+                                    if (WasDown && !IsDown)
+                                    {
+                                        OutputDebugStringA("Space WasDown && !IsDown\n");
+                                    }
+                                    if (WasDown && IsDown)
+                                    {
+                                        Moving = false;
+                                        OutputDebugStringA("Space WasDown && IsDown\n");
+                                    }
+                                    if (WasWasDown && WasDown && !IsDown)
+                                    {
+                                        Moving = true;
+                                        OutputDebugStringA("Space WasWasDown && WasDown && !IsDown\n");
+                                    }
+                                    OutputDebugStringA("-----------------------------------------------\n");
                                 }
+
+                            WasWasDown = WasDown;
                             }break;
 
                             default:
