@@ -48,6 +48,7 @@ MainWindowCallback(HWND WindowHandle,
         OutputDebugStringA("WM_ACTIVATEAPP\n");
     } break;
 
+    case WM_SYSKEYUP: /*case WM_SYSKEYDOWN:*/
     case WM_KEYDOWN:case WM_KEYUP:
     {
         uint32 VKCode = WParam;
@@ -79,6 +80,12 @@ MainWindowCallback(HWND WindowHandle,
 
                 OutputDebugStringA("-----------------\n");
             }
+        }
+
+        bool32 AltKeyWasDown = (LParam & (1 << 29));
+        if (VKCode == VK_F4 && AltKeyWasDown)
+        {
+            GlobalRunning = false;
         }
     } break;
 

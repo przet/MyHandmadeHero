@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio Version 16
-VisualStudioVersion = 16.0.29025.244
+# Visual Studio 2013
+VisualStudioVersion = 12.0.40629.0
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{911E67C6-3D85-4FCE-B560-20A9C3E3FF48}") = "win32_handmade", "win32_handmade.exe", "{6BC9E9ED-114E-400B-B91F-36D403FCFEF2}"
 	ProjectSection(DebuggerProjectSystem) = preProject
@@ -21,7 +21,7 @@ Global
 		Debug|x64 = Debug|x64
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
-		{6BC9E9ED-114E-400B-B91F-36D403FCFEF2}.Debug|x64.ActiveCfg = Release
+		{6BC9E9ED-114E-400B-B91F-36D403FCFEF2}.Debug|x64.ActiveCfg = Debug|x64
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
