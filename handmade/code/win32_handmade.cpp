@@ -9,6 +9,7 @@
     #include <windows.h>
     #include <stdint.h> //uint8_t
     #include <xinput.h>
+    #include <DSound.h>
     #include "Defines.h"
     #include "Typedefs.h"
     #include "Structures.h"
@@ -27,6 +28,59 @@
    extern bool GlobalRunning;
    extern win32_offscreen_buffer GlobalBackBuffer;
 
+   //-----Sound-------
+    internal void
+    Win32InitDSound(HWND WindowHandle, int32 BufferSize, int32 SamplesPerSecond = 44100, int32 BitsPerSample = 16)
+    {
+        LPDIRECTSOUND DirectSound;
+        // NOTE : Load the library
+        HMODULE DSoundLibrary = LoadLibraryA("dsound.dll");
+        if (DSoundLibrary)
+        {
+            // NOTE : Get a Direct Sound Object
+            HRESULT (*DirectSoundCreate)(LPCGUID pcGuidDevice, LPDIRECTSOUND* ppDS, LPUNKNOWN pUnkOuter)
+                = (HRESULT (*)(LPCGUID pcGuidDevice, LPDIRECTSOUND* ppDS, LPUNKNOWN pUnkOuter))
+                  GetProcAddress(DSoundLibrary, "DirectSoundCreate");
+            
+            if (DirectSoundCreate && DirectSoundCreate(0, &DirectSound, 0) == DS_OK)
+            {
+               if(DirectSound->SetCooperativeLevel(WindowHandle, DSSCL_PRIORITY) == DS_OK)
+               {
+                   DSBUFFERDESC BufferDesc = {};
+                   BufferDesc.dwSize = sizeof(BufferDesc);
+                   BufferDesc.dwFlags = DSBCAPS_PRIMARYBUFFER;
+
+                   LPDIRECTSOUNDBUFFER PrimaryBuffer;
+                   if (DirectSound->CreateSoundBuffer(&BufferDesc, &PrimaryBuffer, 0) == DS_OK)
+                   {
+                       WAVEFORMATEX WaveFormat = {};
+                      WaveFormat.wFormatTag = WAVE_FORMAT_PCM;
+                      WaveFormat.nChannels = 2;
+                      WaveFormat.nSamplesPerSec = SamplesPerSecond;
+                      WaveFormat.nAvgBytesPerSec = WaveFormat.nSamplesPerSec * WaveFormat.nBlockAlign;
+                      WaveFormat.nBlockAlign = WaveFormat.nChannels * WaveFormat.wBitsPerSample/8;
+                      WaveFormat.wBitsPerSample = BitsPerSample;
+
+                      //PrimaryBuffer->
+                      
+                       
+
+                   }
+               }
+            }
+        }
+
+
+
+        // NOTE : "Create" a primary buffer
+
+        // Note : "Create a secondary buffer
+
+        // Note : Start it playing!
+
+    }
+
+    //------End Sound-----
     int CALLBACK 
     WinMain(HINSTANCE Instance,
            HINSTANCE PrevInstance,
