@@ -1,0 +1,1 @@
+- Look into why creating the direct sound object manually (without defines) causes the runtime crash

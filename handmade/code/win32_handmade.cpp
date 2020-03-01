@@ -28,9 +28,12 @@
    extern bool GlobalRunning;
    extern win32_offscreen_buffer GlobalBackBuffer;
 
+#define DIRECT_SOUND_CREATE(name) HRESULT WINAPI name(LPCGUID pcGuidDevice, LPDIRECTSOUND* ppDS, LPUNKNOWN pUnkOuter)
+typedef DIRECT_SOUND_CREATE(direct_sound_create);
+
    //-----Sound-------
     internal void
-    Win32InitDSound(HWND WindowHandle, int32 BufferSize, int32 SamplesPerSecond = 44100, int32 BitsPerSample = 16)
+    Win32InitDSound(HWND WindowHandle, int32 BufferSize = 48000*sizeof(int16)*2, int32 SamplesPerSecond = 44100, int32 BitsPerSample = 16)
     {
         LPDIRECTSOUND DirectSound;
         // NOTE : Load the library
@@ -38,46 +41,83 @@
         if (DSoundLibrary)
         {
             // NOTE : Get a Direct Sound Object
-            HRESULT (*DirectSoundCreate)(LPCGUID pcGuidDevice, LPDIRECTSOUND* ppDS, LPUNKNOWN pUnkOuter)
-                = (HRESULT (*)(LPCGUID pcGuidDevice, LPDIRECTSOUND* ppDS, LPUNKNOWN pUnkOuter))
-                  GetProcAddress(DSoundLibrary, "DirectSoundCreate");
-            
+            //HRESULT (*DirectSoundCreate)(LPCGUID pcGuidDevice, LPDIRECTSOUND * ppDS, LPUNKNOWN pUnkOuter)
+            //    = (HRESULT(*)(LPCGUID pcGuidDevice, LPDIRECTSOUND * ppDS, LPUNKNOWN pUnkOuter))
+            //    GetProcAddress(DSoundLibrary, "DirectSoundCreate");
+
+            // TODO find out why ^ didn't work (and v did)
+            direct_sound_create* DirectSoundCreate = (direct_sound_create*)
+                GetProcAddress(DSoundLibrary, "DirectSoundCreate");
+
             if (DirectSoundCreate && DirectSoundCreate(0, &DirectSound, 0) == DS_OK)
             {
-               if(DirectSound->SetCooperativeLevel(WindowHandle, DSSCL_PRIORITY) == DS_OK)
-               {
-                   DSBUFFERDESC BufferDesc = {};
-                   BufferDesc.dwSize = sizeof(BufferDesc);
-                   BufferDesc.dwFlags = DSBCAPS_PRIMARYBUFFER;
+                WAVEFORMATEX WaveFormat = {};
+                WaveFormat.wFormatTag = WAVE_FORMAT_PCM;
+                WaveFormat.nChannels = 2;
+                WaveFormat.nSamplesPerSec = SamplesPerSecond;
+                WaveFormat.nBlockAlign = WaveFormat.nChannels * WaveFormat.wBitsPerSample / 8;
+                WaveFormat.nAvgBytesPerSec = WaveFormat.nSamplesPerSec * WaveFormat.nBlockAlign;
+                WaveFormat.wBitsPerSample = 16;
+                WaveFormat.cbSize = 0;
 
-                   LPDIRECTSOUNDBUFFER PrimaryBuffer;
-                   if (DirectSound->CreateSoundBuffer(&BufferDesc, &PrimaryBuffer, 0) == DS_OK)
-                   {
-                       WAVEFORMATEX WaveFormat = {};
-                      WaveFormat.wFormatTag = WAVE_FORMAT_PCM;
-                      WaveFormat.nChannels = 2;
-                      WaveFormat.nSamplesPerSec = SamplesPerSecond;
-                      WaveFormat.nAvgBytesPerSec = WaveFormat.nSamplesPerSec * WaveFormat.nBlockAlign;
-                      WaveFormat.nBlockAlign = WaveFormat.nChannels * WaveFormat.wBitsPerSample/8;
-                      WaveFormat.wBitsPerSample = BitsPerSample;
+                if (DirectSound->SetCooperativeLevel(WindowHandle, DSSCL_PRIORITY) == DS_OK)
+                {
+                    DSBUFFERDESC BufferDesc = {};
+                    BufferDesc.dwSize = sizeof(BufferDesc);
+                    BufferDesc.dwFlags = DSBCAPS_PRIMARYBUFFER;
 
-                      //PrimaryBuffer->
-                      
-                       
+                    // "Create" a primary buffer
+                    // TODO: DSBCAPS_GLOBALFOUCS?
+                    LPDIRECTSOUNDBUFFER PrimaryBuffer;
+                    if (DirectSound->CreateSoundBuffer(&BufferDesc, &PrimaryBuffer, 0) == DS_OK)
+                    {
+                        HRESULT Error = PrimaryBuffer->SetFormat(&WaveFormat);
+                        if (Error == DS_OK)
+                        {
+                            //NOTE:Format set!
+                            OutputDebugStringA("Primary buffer format was set. \n");
+                        }
+                        else
+                        {
+                            //TODO:Diagnostic
+                            OutputDebugStringA("Primary buffer format was NOT set. \n");
+                        }
+                    }
+                    else
+                    {
+                        //TODO:Diagnostic
+                    }
+                }
+                else
+                {
+                    //TODO:Diagnostic
+                }
 
-                   }
-               }
+                // "Create" a secondary buffer
+                // TODO: DSBCAPS_GETCURRENTPOSITION?
+                DSBUFFERDESC BufferDesc = {};
+                BufferDesc.dwSize = sizeof(BufferDesc);
+                BufferDesc.dwFlags = 0;
+                BufferDesc.dwBufferBytes = BufferSize;
+                BufferDesc.lpwfxFormat = &WaveFormat;
+                LPDIRECTSOUNDBUFFER SecondaryBuffer;
+                if (DirectSound->CreateSoundBuffer(&BufferDesc, &SecondaryBuffer, 0) == DS_OK)
+                {
+                    HRESULT Error = SecondaryBuffer->SetFormat(&WaveFormat);
+                    if (Error == DS_OK)
+                    {
+                        // Note : Start it playing!
+                        OutputDebugStringA("Secondary buffer created successfully. \n");
+                    }
+                }
+                else
+                {
+                    //TODO:Diagnostic
+                        OutputDebugStringA("Secondary buffer NOT created successfully. \n");
+                }
+
             }
         }
-
-
-
-        // NOTE : "Create" a primary buffer
-
-        // Note : "Create a secondary buffer
-
-        // Note : Start it playing!
-
     }
 
     //------End Sound-----
@@ -119,8 +159,11 @@
             {
                 int XOffset = 0;
                 int YOffset = 0;
+
+
                 MSG Message;
                 GlobalRunning = true;
+                Win32InitDSound(WindowHandle);
                 bool Moving = true;
                 bool WasWasDown = true;
 
