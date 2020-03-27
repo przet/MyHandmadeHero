@@ -101,19 +101,14 @@ typedef DIRECT_SOUND_CREATE(direct_sound_create);
                 BufferDesc.dwBufferBytes = BufferSize;
                 BufferDesc.lpwfxFormat = &WaveFormat;
                 LPDIRECTSOUNDBUFFER SecondaryBuffer;
-                if (DirectSound->CreateSoundBuffer(&BufferDesc, &SecondaryBuffer, 0) == DS_OK)
+                HRESULT Error = DirectSound->CreateSoundBuffer(&BufferDesc, &SecondaryBuffer, 0);
+                if (Error == DS_OK)
                 {
-                    HRESULT Error = SecondaryBuffer->SetFormat(&WaveFormat);
-                    if (Error == DS_OK)
-                    {
-                        // Note : Start it playing!
-                        OutputDebugStringA("Secondary buffer created successfully. \n");
-                    }
+                    OutputDebugStringA("Secondary buffer created successfully. \n");
                 }
                 else
                 {
-                    //TODO:Diagnostic
-                        OutputDebugStringA("Secondary buffer NOT created successfully. \n");
+                    OutputDebugStringA("Secondary buffer NOT created successfully. \n");
                 }
 
             }
