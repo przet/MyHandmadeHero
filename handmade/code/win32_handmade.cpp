@@ -51,13 +51,14 @@ typedef DIRECT_SOUND_CREATE(direct_sound_create);
 
             if (DirectSoundCreate && DirectSoundCreate(0, &DirectSound, 0) == DS_OK)
             {
-                WAVEFORMATEX WaveFormat = {};
+                // Leave unitialised to make sure we initialise everything in correct order
+                WAVEFORMATEX WaveFormat;
                 WaveFormat.wFormatTag = WAVE_FORMAT_PCM;
                 WaveFormat.nChannels = 2;
                 WaveFormat.nSamplesPerSec = SamplesPerSecond;
+                WaveFormat.wBitsPerSample = 16;
                 WaveFormat.nBlockAlign = WaveFormat.nChannels * WaveFormat.wBitsPerSample / 8;
                 WaveFormat.nAvgBytesPerSec = WaveFormat.nSamplesPerSec * WaveFormat.nBlockAlign;
-                WaveFormat.wBitsPerSample = 16;
                 WaveFormat.cbSize = 0;
 
                 if (DirectSound->SetCooperativeLevel(WindowHandle, DSSCL_PRIORITY) == DS_OK)
