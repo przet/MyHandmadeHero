@@ -1,0 +1,2 @@
+- From about the start until 13:36 is c++/COM vtable discussions/explanations
+- Why can't you write at the start of buffer (~22:15 and before)? Something to do with it being a system buffer (and hence the lock)?
