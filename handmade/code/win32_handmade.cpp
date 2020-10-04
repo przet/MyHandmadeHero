@@ -25,13 +25,8 @@
     extern x_input_get_state* XInputGetState_;
     extern x_input_set_state* XInputSetState_;
 
-   extern bool GlobalRunning;
-   extern win32_offscreen_buffer GlobalBackBuffer;
-
-global_variable LPDIRECTSOUNDBUFFER GlobalSecondaryBuffer;
-
-#define DIRECT_SOUND_CREATE(name) HRESULT WINAPI name(LPCGUID pcGuidDevice, LPDIRECTSOUND* ppDS, LPUNKNOWN pUnkOuter)
-typedef DIRECT_SOUND_CREATE(direct_sound_create);
+    extern bool GlobalRunning;
+    extern win32_offscreen_buffer GlobalBackBuffer;
 
    //-----Sound-------
     internal void

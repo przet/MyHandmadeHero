@@ -18,3 +18,6 @@ typedef X_INPUT_SET_STATE(x_input_set_state);
 
 #define XInputGetState XInputGetState_
 #define XInputSetState XInputSetState_
+
+global_variable LPDIRECTSOUNDBUFFER GlobalSecondaryBuffer;
+#define DIRECT_SOUND_CREATE(name) HRESULT WINAPI name(LPCGUID pcGuidDevice, LPDIRECTSOUND* ppDS, LPUNKNOWN pUnkOuter)
