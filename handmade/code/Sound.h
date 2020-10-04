@@ -5,7 +5,7 @@
 #include "Defines_Typedefs.h"
 
 internal void
-Win32InitDSound(HWND WindowHandle, int32 BufferSize = 48000 * sizeof(int16) * 2, int32 SamplesPerSecond = 44100, int32 BitsPerSample = 16)
+Win32InitDSound(HWND WindowHandle, int32 BufferSize, int32 SamplesPerSecond, int32 BitsPerSample)
 {
     LPDIRECTSOUND DirectSound;
     // NOTE : Load the library

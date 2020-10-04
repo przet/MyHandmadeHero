@@ -77,8 +77,9 @@
                 int BytesPerSample = sizeof(int16) * 2;
                 int SecondaryBufferSize = SamplesPerSecond * BytesPerSample;
                 int ToneVolume = 800;
+                int32 BitsPerSample = 16;
 
-                Win32InitDSound(WindowHandle, SecondaryBufferSize, SamplesPerSecond);
+                Win32InitDSound(WindowHandle, SecondaryBufferSize, SamplesPerSecond, BitsPerSample);
                 GlobalSecondaryBuffer->Play(0, 0, DSBPLAY_LOOPING);
 
                 MSG Message;
