@@ -134,6 +134,7 @@
     <ClInclude Include="..\..\handmade\code\MainWindowCallback.h" />
     <ClInclude Include="..\..\handmade\code\RenderWeirdGradient.h" />
     <ClInclude Include="..\..\handmade\code\ResizeDIBSection.h" />
+    <ClInclude Include="..\..\handmade\code\Sound.h" />
     <ClInclude Include="..\..\handmade\code\Structures.h" />
     <ClInclude Include="..\..\handmade\code\XInputStubs.h" />
   </ItemGroup>
