@@ -10,8 +10,7 @@
     #include <stdint.h> //uint8_t
     #include <xinput.h>
     #include <DSound.h>
-    #include "Defines.h"
-    #include "Typedefs.h"
+    #include "Defines_Typedefs.h"
     #include "Structures.h"
     #include "RenderWeirdGradient.h"
     #include "DisplayBufferInWindow.h"

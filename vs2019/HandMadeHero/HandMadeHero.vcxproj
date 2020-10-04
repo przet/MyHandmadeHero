@@ -127,7 +127,7 @@
     <ClCompile Include="..\..\handmade\code\win32_handmade.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="..\..\handmade\code\Defines.h" />
+    <ClInclude Include="..\..\handmade\code\Defines_Typedefs.h" />
     <ClInclude Include="..\..\handmade\code\DisplayBufferInWindow.h" />
     <ClInclude Include="..\..\handmade\code\GetWindowDimension.h" />
     <ClInclude Include="..\..\handmade\code\LoadXInput.h" />
@@ -135,7 +135,6 @@
     <ClInclude Include="..\..\handmade\code\RenderWeirdGradient.h" />
     <ClInclude Include="..\..\handmade\code\ResizeDIBSection.h" />
     <ClInclude Include="..\..\handmade\code\Structures.h" />
-    <ClInclude Include="..\..\handmade\code\Typedefs.h" />
     <ClInclude Include="..\..\handmade\code\XInputStubs.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
