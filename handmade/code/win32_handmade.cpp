@@ -21,6 +21,7 @@
     #include "LoadXInput.h"
     #include <stdio.h>
     #include "Sound.h"
+    #include <math.h>
 
     extern x_input_get_state* XInputGetState_;
     extern x_input_set_state* XInputSetState_;
@@ -72,8 +73,8 @@
                 int SamplesPerSecond = 48000;
                 int ToneHz = 256; // Programmers middle C ;) 
                 uint32  RunningSampleIndex = 0; // unsigned so goes back to zero if overflow
-                int SquareWavePeriod = SamplesPerSecond/ToneHz ;
-                int HalfSquareWavePeriod = SquareWavePeriod / 2;
+                int WavePeriod = SamplesPerSecond/ToneHz ;
+                int HalfWavePeriod = WavePeriod / 2;
                 int BytesPerSample = sizeof(int16) * 2;
                 int SecondaryBufferSize = SamplesPerSecond * BytesPerSample;
                 int ToneVolume = 800;
@@ -222,14 +223,18 @@
                             DWORD Region2SampleCount = Region2Size / BytesPerSample ;
                             for (DWORD SampleIndex = 0; SampleIndex < Region1SampleCount; ++ SampleIndex)
                             {
-                                int16 SampleValue = ((RunningSampleIndex / HalfSquareWavePeriod) % 2)  ? ToneVolume : -ToneVolume;
+                                real32 t = 2.0f*3.14* (real32)RunningSampleIndex / (real32)WavePeriod;
+                                real32 SineValue = sinf(t);
+                                int16 SampleValue = (int16)(SineValue * ToneVolume);
                                 *SampleOut++ = SampleValue;
                                 *SampleOut++ = SampleValue;
                                 ++RunningSampleIndex;
                             }
                             for (DWORD SampleIndex = 0; SampleIndex < Region2SampleCount; ++ SampleIndex)
                             {
-                                int16 SampleValue = ((RunningSampleIndex / HalfSquareWavePeriod) % 2)  ? ToneVolume : -ToneVolume;
+                                real32 t = 2.0f*3.14* (real32)RunningSampleIndex / (real32)WavePeriod;
+                                real32 SineValue = sinf(t);
+                                int16 SampleValue = (int16)(SineValue * ToneVolume);
                                 *SampleOut++ = SampleValue;
                                 *SampleOut++ = SampleValue;
                                 ++RunningSampleIndex;
