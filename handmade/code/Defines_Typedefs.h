@@ -41,6 +41,8 @@ typedef int32_t int32;
 typedef int64_t int64;
 typedef int32 bool32;
 typedef DIRECT_SOUND_CREATE(direct_sound_create);
+using real32 = float;
+using real64 = double;
 
 #endif // !DEFINES_TYPEDEFS_H
 
