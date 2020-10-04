@@ -10,11 +10,11 @@
     #include <stdint.h> //uint8_t
     #include <xinput.h>
     #include <DSound.h>
+    #include "RenderWeirdGradient.h"
+    #include "ResizeDIBSection.h"
     #include "Defines_Typedefs.h"
     #include "Structures.h"
-    #include "RenderWeirdGradient.h"
     #include "DisplayBufferInWindow.h"
-    #include "ResizeDIBSection.h"
     #include "GetWindowDimension.h"
     #include "MainWindowCallback.h"
     #include "XInputStubs.h"

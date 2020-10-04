@@ -1,3 +1,7 @@
+#ifndef DISPLAYBUFFERINWINODW_H
+#define DISPLAYBUFFERINWINODW_H
+
+#include "Structures.h"
 void
 Win32DisplayBufferInWindow(win32_offscreen_buffer Buffer, HDC DeviceContext, int WindowWidth, int WindowHeight)
 {
@@ -17,3 +21,5 @@ Win32DisplayBufferInWindow(win32_offscreen_buffer Buffer, HDC DeviceContext, int
         DIB_RGB_COLORS,
         SRCCOPY);
 }
+
+#endif // DISPLAYBUFFERINWINODW_H

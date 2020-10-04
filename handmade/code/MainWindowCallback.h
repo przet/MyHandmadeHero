@@ -1,3 +1,9 @@
+#ifndef MAINWINDOWCALLBACK_H
+#define MAINWINDOWCALLBACK_H
+
+#include "Defines_Typedefs.h"
+#include "Structures.h"
+
 //TODO: This is a global for now
 global_variable bool GlobalRunning;
 global_variable win32_offscreen_buffer GlobalBackBuffer;
@@ -130,3 +136,5 @@ MainWindowCallback(HWND WindowHandle,
 
     return(Result);
 }
+#endif // !MAINWINDOWCALLBACK_H
+

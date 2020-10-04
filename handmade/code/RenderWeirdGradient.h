@@ -1,3 +1,9 @@
+#ifndef RENDERWEIRDGRADIENT_H
+#define RENDERWEIRDGRADIENT_H
+
+#include "Defines_Typedefs.h"
+#include "Structures.h"
+
 internal void
 RenderWeirdGradient(win32_offscreen_buffer* Buffer, int XOffset, int YOffset)
 {
@@ -46,3 +52,6 @@ RenderWeirdGradient(win32_offscreen_buffer* Buffer, int XOffset, int YOffset)
     }
 
 }
+
+#endif // !RENDERWEIRDGRADIENT_H
+

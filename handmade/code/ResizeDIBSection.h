@@ -1,3 +1,9 @@
+#ifndef RESIZEDIBSECTION_H
+#define RESIZEDIBSECTION_H
+
+#include "Defines_Typedefs.h"
+#include "Structures.h"
+
 internal void
 Win32ResizeDIBSection(win32_offscreen_buffer* Buffer, int Width, int Height)
 {
@@ -37,6 +43,6 @@ Win32ResizeDIBSection(win32_offscreen_buffer* Buffer, int Width, int Height)
     Buffer->Pitch = Buffer->Width * Buffer->BytesPerPixel;
 
     //TODO : we might want to initialise this to black 
-
-
 }
+
+#endif // !RESIZEDIBSECTION_H

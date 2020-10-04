@@ -1,3 +1,6 @@
+#ifndef STRUCTURES_H
+#define STRUCTURES_H
+
 struct win32_offscreen_buffer
 {
     BITMAPINFO Info;
@@ -13,3 +16,6 @@ struct win32_window_dimension
     int Width;
     int Height;
 };
+
+#endif // !STRUCTURES_H
+

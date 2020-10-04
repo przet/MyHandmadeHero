@@ -1,3 +1,8 @@
+#ifndef GETWINDOWDIM_H
+#define GETWINDOWDIM_H
+
+#include "Structures.h"
+
 win32_window_dimension
 win32GetWindowDimension(HWND Window)
 {
@@ -9,3 +14,5 @@ win32GetWindowDimension(HWND Window)
 
     return (Result);
 }
+
+#endif // !GETWINDOWDIM_H

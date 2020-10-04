@@ -1,3 +1,8 @@
+#ifndef LOADXINPUT_H
+#define LOADXINPUT_H
+
+#include "Defines_Typedefs.h" 
+
 global_variable x_input_get_state* XInputGetState_ = XInputGetStateStub;
 global_variable x_input_set_state* XInputSetState_ = XInputSetStateStub;
 
@@ -17,3 +22,5 @@ Win32LoadXInput(void)
     }
 
 }
+
+#endif //! LOADXINPUT_H
