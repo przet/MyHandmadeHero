@@ -30,6 +30,8 @@
    extern bool GlobalRunning;
    extern win32_offscreen_buffer GlobalBackBuffer;
 
+   LPDIRECTSOUNDBUFFER GlobalSecondarySoundBuffer;
+   
    #define DIRECT_SOUND_CREATE(name) HRESULT WINAPI name(LPCGUID pcGuidDevice, LPDIRECTSOUND *ppDS, LPUNKNOWN pUnkOuter)  
    typedef DIRECT_SOUND_CREATE(direct_sound_create);
 
@@ -50,10 +52,7 @@
                if (SUCCEEDED(DirectSound->SetCooperativeLevel(Window, DSSCL_PRIORITY)))
                {
                    win32CreatePrimarySoundBuffer(DirectSound, SamplesPerSecond, win32SetWaveFormat(SamplesPerSecond));
-                   win32CreateSecondarySoundBuffer(DirectSound, SamplesPerSecond, BufferSize, win32SetWaveFormat(SamplesPerSecond));
-
-                   // Start it playing
-
+                   win32CreateSecondarySoundBuffer(DirectSound, SamplesPerSecond, BufferSize, win32SetWaveFormat(SamplesPerSecond), &GlobalSecondarySoundBuffer);
                }
                else
                {
@@ -217,6 +216,72 @@
                     
 
                     RenderWeirdGradient(&GlobalBackBuffer, XOffset, YOffset);
+
+                    
+                    //----------------Direct Sound Test
+                    LPVOID Region1;
+                    DWORD Region1Size;
+                    LPVOID Region2;
+                    DWORD Region2Size;
+
+                    DWORD WriteStart = 0;
+                    DWORD BytesToWrite = 2;
+
+                    GlobalSecondarySoundBuffer->Lock(
+                        WriteStart,
+                        BytesToWrite,
+                        &Region1,
+                        &Region1Size,
+                        &Region2,
+                        &Region2Size,
+                        0
+                    );
+
+                    int SquareWaveCounter = 0;
+                    int SamplesPerSecond = 48000;
+                    int Frequency = 256;
+                    int SquareWavePeriod = SamplesPerSecond/Frequency;
+                    int BytesPerSample = win32SetWaveFormat(SamplesPerSecond).wBitsPerSample/8;
+                    int16_t* SampleOut = (int16_t*)Region1;
+                    DWORD Region1SampleCount = Region1Size / BytesPerSample;
+                    DWORD Region2SampleCount = Region2Size / BytesPerSample;
+                    for (DWORD SampleIndex = 0; SampleIndex < Region1Size; ++SampleIndex)
+                    {
+                        if (!SquareWaveCounter)
+                        {
+                            SquareWaveCounter = SquareWavePeriod;
+                        }
+                        int16_t SampleValue = (SquareWaveCounter > SquareWavePeriod / 2) ? 16000 : -16000;
+
+                        // 2 channels
+                        *SampleOut++ = SampleValue;
+                        *SampleOut++ = SampleValue;
+
+                        --SquareWaveCounter;
+                    }
+
+                    for (DWORD SampleIndex = 0; SampleIndex < Region2Size; ++SampleIndex)
+                    {
+                        if (!SquareWaveCounter)
+                        {
+                            SquareWaveCounter = SquareWavePeriod;
+                        }
+                        int16_t SampleValue = (SquareWaveCounter > SquareWavePeriod / 2) ? 16000 : -16000;
+
+                        // 2 channels
+                        *SampleOut++ = SampleValue;
+                        *SampleOut++ = SampleValue;
+
+                        --SquareWaveCounter;
+
+                    }
+
+                    GlobalSecondarySoundBuffer->Play(0, 0, DSBPLAY_LOOPING);
+
+                    //--------- END Direct Sound Test
+
+
+
 
                     HDC DeviceContext = GetDC(WindowHandle);
                     win32_window_dimension Dimension = win32GetWindowDimension(WindowHandle);

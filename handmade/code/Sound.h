@@ -54,7 +54,7 @@ win32CreatePrimarySoundBuffer(LPDIRECTSOUND DirectSound, int32_t SamplesPerSecon
 }
 
 static void
-win32CreateSecondarySoundBuffer(LPDIRECTSOUND DirectSound, int32_t SamplesPerSecond, int32_t BufferSize, WAVEFORMATEX WaveFormat)
+win32CreateSecondarySoundBuffer(LPDIRECTSOUND DirectSound, int32_t SamplesPerSecond, int32_t BufferSize, WAVEFORMATEX WaveFormat, LPDIRECTSOUNDBUFFER* SecondaryBuffer)
 {
    DSBUFFERDESC BufferDescription = {};
    BufferDescription.dwSize = sizeof(BufferDescription);
@@ -62,9 +62,8 @@ win32CreateSecondarySoundBuffer(LPDIRECTSOUND DirectSound, int32_t SamplesPerSec
 
 
    BufferDescription.lpwfxFormat = &win32SetWaveFormat(SamplesPerSecond);
-   LPDIRECTSOUNDBUFFER SecondaryBuffer;
 
-   HRESULT Error = DirectSound->CreateSoundBuffer(&BufferDescription, &SecondaryBuffer, 0);
+   HRESULT Error = DirectSound->CreateSoundBuffer(&BufferDescription, SecondaryBuffer, 0);
    if (SUCCEEDED(Error))
    {
        OutputDebugStringA("Secondary sound buffer was created. \n");
