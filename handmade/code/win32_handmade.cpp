@@ -20,6 +20,9 @@
     #include "XInputStubs.h"
     #include "LoadXInput.h"
     #include <stdio.h>
+    #include <dsound.h>
+    #include <assert.h>
+    #include "Sound.h"
 
     extern x_input_get_state* XInputGetState_;
     extern x_input_set_state* XInputSetState_;
@@ -27,6 +30,50 @@
    extern bool GlobalRunning;
    extern win32_offscreen_buffer GlobalBackBuffer;
 
+   #define DIRECT_SOUND_CREATE(name) HRESULT WINAPI name(LPCGUID pcGuidDevice, LPDIRECTSOUND *ppDS, LPUNKNOWN pUnkOuter)  
+   typedef DIRECT_SOUND_CREATE(direct_sound_create);
+
+
+   internal void
+   win32InitDSound(HWND Window, int32 SamplesPerSecond, int32 BufferSize)
+   {
+       // Load the library
+       HMODULE DSoundLibrary = LoadLibraryA("dsound.dll");
+
+       if (DSoundLibrary)
+       {
+           direct_sound_create* DirectSoundCreate = (direct_sound_create *) GetProcAddress(DSoundLibrary, "DirectSoundCreate");
+
+           LPDIRECTSOUND DirectSound;
+           if (DirectSoundCreate && SUCCEEDED(DirectSoundCreate(0, &DirectSound, 0)))
+           {
+               if (SUCCEEDED(DirectSound->SetCooperativeLevel(Window, DSSCL_PRIORITY)))
+               {
+                   win32CreatePrimarySoundBuffer(DirectSound, SamplesPerSecond, win32SetWaveFormat(SamplesPerSecond));
+                   win32CreateSecondarySoundBuffer(DirectSound, SamplesPerSecond, BufferSize, win32SetWaveFormat(SamplesPerSecond));
+
+                   // Start it playing
+
+               }
+               else
+               {
+                   // Setting coperative level failed - TODO: Diagnostic
+               }
+           }
+           else
+           {
+               // DirectSoundCreate && DirectSoundCreate() == false - TODO: Diagnostic
+           }
+
+
+       }
+       else
+       {
+           // No DSoundLibrary - TODO: Diagnostic
+       }
+
+
+   }
     int CALLBACK 
     WinMain(HINSTANCE Instance,
            HINSTANCE PrevInstance,
@@ -65,6 +112,9 @@
             {
                 int XOffset = 0;
                 int YOffset = 0;
+
+                win32InitDSound(WindowHandle, 48000, 48000*sizeof(int16_t)*2);
+
                 MSG Message;
                 GlobalRunning = true;
                 bool Moving = true;

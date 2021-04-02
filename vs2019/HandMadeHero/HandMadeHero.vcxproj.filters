@@ -50,5 +50,8 @@
     <ClInclude Include="..\..\handmade\code\XInputStubs.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\handmade\code\Sound.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>
