@@ -22,6 +22,7 @@
     #include <stdio.h>
     #include "Sound.h"
     #include <math.h>
+    #include <assert.h>
 
     extern x_input_get_state* XInputGetState_;
     extern x_input_set_state* XInputSetState_;
@@ -74,10 +75,9 @@
                 int ToneHz = 256; // Programmers middle C ;) 
                 uint32  RunningSampleIndex = 0; // unsigned so goes back to zero if overflow
                 int WavePeriod = SamplesPerSecond/ToneHz ;
-                int HalfWavePeriod = WavePeriod / 2;
                 int BytesPerSample = sizeof(int16) * 2;
                 int SecondaryBufferSize = SamplesPerSecond * BytesPerSample;
-                int ToneVolume = 800;
+                int ToneVolume = 1000;
                 int32 BitsPerSample = 16;
 
                 Win32InitDSound(WindowHandle, SecondaryBufferSize, SamplesPerSecond, BitsPerSample);
@@ -223,7 +223,7 @@
                             DWORD Region2SampleCount = Region2Size / BytesPerSample ;
                             for (DWORD SampleIndex = 0; SampleIndex < Region1SampleCount; ++ SampleIndex)
                             {
-                                real32 t = 2.0f*3.14* (real32)RunningSampleIndex / (real32)WavePeriod;
+                                real32 t = 2.0f * Pi32 * (real32)RunningSampleIndex / (real32)WavePeriod;
                                 real32 SineValue = sinf(t);
                                 int16 SampleValue = (int16)(SineValue * ToneVolume);
                                 *SampleOut++ = SampleValue;
